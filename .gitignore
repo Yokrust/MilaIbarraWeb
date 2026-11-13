@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+configurator/dist/
+theme/assets/configurator.*
+
+# Shopify CLI
+.shopify/
+*.theme-check.yml.lock
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
+# Env
+.env
+.env.local
+
+# Blender backups
+3d-assets/**/*.blend1
+3d-assets/**/*.blend2

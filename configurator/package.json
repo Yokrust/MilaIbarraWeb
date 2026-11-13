@@ -1,0 +1,18 @@
+{
+  "name": "mila-ibarra-configurador-3d",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Configurador 3D (Three.js) de la joyería personalizada. Se compila con Vite a un solo archivo y ese archivo se copia a theme/assets.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:theme": "vite build && cp dist/configurator.js ../theme/assets/configurator.js"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  }
+}
