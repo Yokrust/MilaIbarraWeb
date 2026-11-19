@@ -157,18 +157,15 @@
       ]
     },
     "banner": {
-      "type": "mi-hero",
+      "type": "mi-spin-banner",
       "settings": {
-        "fallback": "mi-banner.jpg",
-        "image_alt": "Medalla de oro con iniciales grabadas sobre fondo negro",
-        "eager": false,
+        "image_alt": "Medalla de oro con las iniciales M·I grabadas, girando sobre fondo negro",
         "label": "El configurador 3D",
         "heading": "Mírala girar antes de pedirla",
-        "heading_tag": "h2",
         "button_label": "Abrir el configurador",
         "button_link": "/products/medalla-firma",
-        "height_desktop": 650,
-        "height_mobile": 520,
+        "scroll_desktop": 260,
+        "scroll_mobile": 220,
         "padding_top_desktop": 96,
         "padding_top_mobile": 0
       }

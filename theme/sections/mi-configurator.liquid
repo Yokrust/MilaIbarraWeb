@@ -330,8 +330,17 @@
     pointer-events: none;
   }
 
+  /* Photo from a thumbnail, shown over the 3D view. Visibility is driven by
+     the .is-showing-photo class, not [hidden]: Horizon's `img { display: block }`
+     overrides [hidden], which left an invisible image on top of the canvas
+     (no drag) and kept the photo stuck after going back to the 3D view. */
   .mi-configurator__photo {
     z-index: 2;
+    display: none;
+  }
+
+  .is-showing-photo .mi-configurator__photo {
+    display: block;
   }
 
   .mi-configurator__tag {

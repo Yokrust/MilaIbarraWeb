@@ -152,6 +152,15 @@ function makeCatalog() {
       '<p>Una medalla lisa para lo que tú quieras decir. Escríbela, elige el metal y mírala girar antes de pedirla.</p>',
   });
   medalla.template_suffix = 'joyeria-personalizada';
+  // The configurable piece has a single default variant in Shopify: the metal,
+  // text and typeface travel as line item properties, not as variant options.
+  medalla.has_only_default_variant = true;
+  medalla.options = ['Title'];
+  medalla.options_with_values = [{ name: 'Title', position: 1, values: ['Default Title'], selected_value: 'Default Title' }];
+  for (const variant of medalla.variants) {
+    variant.title = 'Default Title';
+    variant.option1 = 'Default Title';
+  }
 
   const anillo = makeProduct({
     handle: 'anillo-sello',

@@ -1,0 +1,320 @@
+{% comment %}
+  "Mírala girar antes de pedirla" — Home banner where the medal turns as you
+  scroll (Figma: Banner configurador 18:131 / 23:120, animated).
+
+  The turn is a pre-rendered image sequence (Blender/Cycles, see
+  3d-assets/medalla-firma/render_giro.py): assets/mi-giro-d-##.webp (desktop,
+  16:9) and mi-giro-m-##.webp (mobile, 9:16). <mi-spin> (assets/mi-spin.js)
+  pins the stage while the section scrolls by and maps the scroll position to
+  a frame. No WebGL on the Home — only images, loaded progressively when the
+  banner gets close.
+
+  With prefers-reduced-motion (or without JS) it's a static banner showing the
+  last frame — the medal facing front with its engraving.
+{% endcomment %}
+
+{%- liquid
+  assign frame_count = 72
+  assign last_frame = frame_count | minus: 1
+  assign button_url = section.settings.button_link
+  if button_url == blank
+    if section.settings.product != blank
+      assign button_url = section.settings.product.url
+    else
+      assign button_url = '/products/medalla-firma'
+    endif
+  endif
+  assign last_padded = last_frame | prepend: '0' | slice: -2, 2
+  assign poster_desktop = 'mi-giro-d-' | append: last_padded | append: '.webp' | asset_url
+  assign poster_mobile = 'mi-giro-m-' | append: last_padded | append: '.webp' | asset_url
+-%}
+
+<div
+  class="mi-spin"
+  style="--mi-spin-length-desktop: {{ section.settings.scroll_desktop }}vh; --mi-spin-length-mobile: {{ section.settings.scroll_mobile }}vh; --mi-spin-pt-desktop: {{ section.settings.padding_top_desktop }}px; --mi-spin-pt-mobile: {{ section.settings.padding_top_mobile }}px;"
+  data-testid="mi-spin-{{ section.id }}"
+>
+  <mi-spin class="mi-spin__track">
+    <div class="mi-spin__stage">
+      <picture class="mi-spin__poster">
+        <source media="(min-width: 750px)" srcset="{{ poster_desktop }}" width="1600" height="900">
+        <img
+          src="{{ poster_mobile }}"
+          alt="{{ section.settings.image_alt | escape }}"
+          width="720"
+          height="1280"
+          loading="lazy"
+          decoding="async"
+        >
+      </picture>
+      <canvas class="mi-spin__canvas" aria-hidden="true"></canvas>
+      <div class="mi-shade mi-spin__shade" aria-hidden="true"></div>
+
+      <div class="mi-spin__content" data-mi-spin-content>
+        {%- if section.settings.label != blank -%}
+          <p class="mi-label">{{ section.settings.label }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="mi-h1 mi-spin__heading">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.button_label != blank -%}
+          <a href="{{ button_url }}" class="mi-btn mi-btn--on-image">{{ section.settings.button_label }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <script type="application/json" data-mi-spin-frames>
+      {
+        "desktop": [
+          {%- for i in (0..last_frame) -%}
+            {%- assign padded = i | prepend: '0' | slice: -2, 2 -%}
+            {{- 'mi-giro-d-' | append: padded | append: '.webp' | asset_url | json -}}
+            {%- unless forloop.last %},{% endunless -%}
+          {%- endfor -%}
+        ],
+        "mobile": [
+          {%- for i in (0..last_frame) -%}
+            {%- assign padded = i | prepend: '0' | slice: -2, 2 -%}
+            {{- 'mi-giro-m-' | append: padded | append: '.webp' | asset_url | json -}}
+            {%- unless forloop.last %},{% endunless -%}
+          {%- endfor -%}
+        ]
+      }
+    </script>
+  </mi-spin>
+</div>
+
+<script src="{{ 'mi-spin.js' | asset_url }}" type="module" defer></script>
+
+{% stylesheet %}
+  .mi-spin {
+    --mi-spin-bar: 60px;
+    padding-top: var(--mi-spin-pt-mobile);
+    background: var(--mi-white);
+  }
+
+  .mi-spin__track {
+    display: block;
+    position: relative;
+  }
+
+  /* Static banner (reduced motion / no JS): Figma's 520 / 650 px. */
+  .mi-spin__stage {
+    position: relative;
+    height: 520px;
+    overflow: hidden;
+    background: #000;
+    color: var(--mi-white);
+  }
+
+  .mi-spin__poster,
+  .mi-spin__poster img,
+  .mi-spin__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mi-spin__poster img {
+    object-fit: cover;
+  }
+
+  .mi-spin__canvas {
+    display: none;
+  }
+
+  .mi-spin__shade {
+    height: 45%;
+  }
+
+  .mi-spin__content {
+    position: absolute;
+    inset: auto 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 0 var(--mi-gutter) 32px;
+    text-align: center;
+  }
+
+  .mi-spin__content p,
+  .mi-spin__heading {
+    margin: 0;
+  }
+
+  .mi-spin__heading {
+    max-width: 320px;
+    font-size: 28px;
+    line-height: 38px;
+  }
+
+  .mi-spin__content .mi-btn {
+    margin-top: 6px;
+  }
+
+  /* Animated: the track is as long as the scroll that drives the turn, and
+     the stage sticks under the header bar while it plays. */
+  .mi-spin__track.is-animated {
+    height: var(--mi-spin-length-mobile);
+  }
+
+  .is-animated .mi-spin__stage {
+    position: sticky;
+    top: var(--mi-spin-bar);
+    height: calc(100svh - var(--mi-spin-bar));
+  }
+
+  .is-animated .mi-spin__canvas {
+    display: block;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .is-animated.is-ready .mi-spin__canvas {
+    opacity: 1;
+  }
+
+  .is-animated.is-ready .mi-spin__poster {
+    visibility: hidden;
+  }
+
+  .is-animated .mi-spin__content {
+    opacity: var(--mi-spin-text, 0);
+    transform: translateY(calc((1 - var(--mi-spin-text, 0)) * 24px));
+    will-change: opacity, transform;
+  }
+
+  .is-animated .mi-spin__content .mi-btn {
+    pointer-events: var(--mi-spin-click, none);
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-spin {
+      --mi-spin-bar: 88px;
+      padding-top: var(--mi-spin-pt-desktop);
+    }
+
+    .mi-spin__stage {
+      height: 650px;
+    }
+
+    .mi-spin__track.is-animated {
+      height: var(--mi-spin-length-desktop);
+    }
+
+    .mi-spin__heading {
+      max-width: none;
+      font-size: 32px;
+      line-height: 42px;
+    }
+
+    .mi-spin__content {
+      padding-bottom: 48px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MI · Banner que gira",
+  "tag": "section",
+  "class": "mi-spin-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "La medalla gira mientras se baja por la página. Los cuadros (assets/mi-giro-*.webp) salen de 3d-assets/medalla-firma/render_giro.py."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Texto alternativo",
+      "default": "Medalla de oro con las iniciales M·I grabadas, girando sobre fondo negro"
+    },
+    {
+      "type": "header",
+      "content": "Texto"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Etiqueta",
+      "default": "El configurador 3D"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Mírala girar antes de pedirla"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Texto del botón",
+      "default": "Abrir el configurador"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Enlace del botón",
+      "info": "Si lo dejas vacío, lleva al producto de abajo (o a /products/medalla-firma)."
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Producto de joyería personalizada"
+    },
+    {
+      "type": "header",
+      "content": "Animación"
+    },
+    {
+      "type": "range",
+      "id": "scroll_desktop",
+      "label": "Recorrido del giro en escritorio",
+      "info": "Cuánto hay que bajar (en % de la pantalla) para completar el giro.",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "%",
+      "default": 260
+    },
+    {
+      "type": "range",
+      "id": "scroll_mobile",
+      "label": "Recorrido del giro en celular",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "%",
+      "default": 220
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Espacio arriba en escritorio",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Espacio arriba en celular",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "MI · Banner que gira"
+    }
+  ]
+}
+{% endschema %}

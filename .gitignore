@@ -28,3 +28,6 @@ configurator/dist/
 # Uncompressed Blender export — rebuilt by 3d-assets/medalla-firma/build_medalla.py;
 # the shipped, meshopt-compressed model is theme/assets/medalla-firma.glb
 3d-assets/**/*.raw.glb
+
+# Demo videos for the client (~25 MB each) — regenerate with preview/record-demo.mjs
+Presentation/Videos/*.mp4

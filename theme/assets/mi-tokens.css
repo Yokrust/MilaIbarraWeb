@@ -474,6 +474,13 @@ select.mi-field__input:focus {
   }
 }
 
+/* ---------- [hidden] ----------
+ * Horizon's base.css gives img/svg/canvas/video `display: block`, which beats
+ * the browser's [hidden] rule. Make [hidden] win again on our own components. */
+[class*='mi-'][hidden] {
+  display: none !important;
+}
+
 /* ---------- Document scrolling ----------
  * Horizon makes .page-wrapper the scroll container from 990px up. The campaign
  * pages need the window to scroll at every width: the sticky header, the

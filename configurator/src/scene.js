@@ -23,6 +23,9 @@ import { Engraving } from './engraving.js';
 import { applyMetal, createMetal, DEFAULT_METAL } from './materials.js';
 
 const MAX_PIXEL_RATIO = 2; // battery: never render above 2× (scope doc)
+// Depth of the engraving. The medal is ~18 mm in world units, so the bump
+// derivatives are large; this keeps the cut walls crisp but not exaggerated.
+const BUMP_SCALE = 2.5;
 
 /**
  * The 3D preview. Renders only when something changes (state, resize,
@@ -66,8 +69,10 @@ export class MedalScene {
     this.face = createMetal();
     this.face.roughness = 1;
     this.face.map = this.engraving.map;
-    this.face.normalMap = this.engraving.normalMap;
+    this.face.bumpMap = this.engraving.bumpMap;
+    this.face.bumpScale = BUMP_SCALE;
     this.face.roughnessMap = this.engraving.roughnessMap;
+    this.pendingEngraving = 0;
     this.back = createMetal();
 
     this.pivot = new Group();
@@ -125,11 +130,22 @@ export class MedalScene {
       for (const material of [this.metal, this.face, this.back]) applyMetal(material, this.state.material);
     }
     if (force || previous.text !== this.state.text || previous.font !== this.state.font) {
-      await this.engraving.drawText(this.state.text, this.state.font);
+      // Font files load once; after that each redraw is synchronous.
+      await this.engraving.ready(this.state.font);
+      this.queueEngraving();
       // Turn the engraving toward the viewer when the text changes and it's facing away.
       if (!force) this.faceFront();
     }
     this.requestRender();
+  }
+
+  /** Coalesces fast typing: at most one engraving redraw per frame, with the latest state. */
+  queueEngraving() {
+    if (this.pendingEngraving) return;
+    this.pendingEngraving = requestAnimationFrame(() => {
+      this.pendingEngraving = 0;
+      if (this.engraving.drawText(this.state.text, this.state.font)) this.requestRender();
+    });
   }
 
   /** Soft entrance: a quarter turn that settles facing the camera. */
@@ -217,6 +233,7 @@ export class MedalScene {
 
   dispose() {
     cancelAnimationFrame(this.frame);
+    cancelAnimationFrame(this.pendingEngraving);
     this.resizeObserver.disconnect();
     this.controls.dispose();
     this.engraving.dispose();

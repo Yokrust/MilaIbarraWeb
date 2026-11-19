@@ -51,7 +51,7 @@ revelado al hacer scroll en `snippets/mi-head.liquid`.
 
 | Página | Plantilla | Secciones |
 |---|---|---|
-| Home | `templates/index.json` | `mi-hero` (también el banner), `mi-triptych`, `mi-statement`, `mi-product-row`, `mi-editorial`, `mi-two-ways`, `mi-timeline` (scroll horizontal fijo), `mi-cta-contact` |
+| Home | `templates/index.json` | `mi-hero`, `mi-triptych`, `mi-statement`, `mi-product-row`, `mi-editorial`, `mi-two-ways`, `mi-spin-banner` (la medalla gira al hacer scroll), `mi-timeline` (scroll horizontal fijo), `mi-cta-contact` |
 | Joyería personalizada | `templates/product.joyeria-personalizada.json` | `mi-configurator`, `mi-steps`, `mi-product-row` |
 | Contacto | `templates/page.contacto.json` | `mi-contact` (`{% form 'contact' %}` + WhatsApp) |
 | Carrito | en todas las páginas | `mi-cart-drawer` (Ajax Cart API + Section Rendering API) |
@@ -81,9 +81,11 @@ precios reales en las tarjetas del Home.
   `theme/assets/configurator.js` (un módulo ES, ~160 KB gzip).
   - `scene.js`: render solo cuando algo cambia, pixel ratio ≤ 2, OrbitControls
     con límites, entorno de estudio, giro automático, pantalla completa.
-  - `engraving.js`: el texto se dibuja en un canvas y se convierte en normal
-    map + rugosidad + oscurecido del corte (fase 2: la imagen del cliente usa
-    el mismo canal).
+  - `engraving.js`: el texto se dibuja con Canvas 2D (relleno + sombra
+    difuminada, acelerado por GPU) en tres texturas: relieve (`bumpMap`),
+    oscurecido del corte y rugosidad. Sin cálculo pixel por pixel: cada tecla
+    cuesta ~1–10 ms, y como mucho se redibuja una vez por cuadro (fase 2: la
+    imagen del cliente usa los mismos canvas).
   - `materials.js`: presets de oro, plata y oro rosa.
 - Tema: `assets/mi-configurator-form.js` es la máquina de estados (texto,
   tipografía, material) y el agregar al carrito; `mi-configurator-loader.js`
@@ -91,6 +93,12 @@ precios reales en las tarjetas del Home.
   visor está a la vista. Sin 3D se queda la foto, que cambia según el metal.
 - Al pedido llegan `properties[Texto]`, `properties[Tipografía]` y
   `properties[Material]`. La imagen propia está como **Próximamente** (fase 2).
+- **Banner que gira (Home):** `3d-assets/medalla-firma/render_giro.py` renderiza
+  en Cycles 72 cuadros de la medalla girando (escritorio 16:9 y celular 9:16)
+  y `frames_to_webp.py` los deja en `theme/assets/mi-giro-{d,m}-##.webp`.
+  `assets/mi-spin.js` fija el banner y elige el cuadro según el scroll (con
+  fundido entre cuadros), cargándolos de grueso a fino. Sin WebGL en la Home.
+  Con `prefers-reduced-motion` queda fijo en el último cuadro.
 - Las tarjetas del Home enlazan con el material ya elegido:
   `/products/medalla-firma?material=plata` (también `tipografia`, `texto`).
 
@@ -108,12 +116,16 @@ cd theme && shopify theme dev     # previsualización real — necesita la tiend
 ```bash
 /Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python 3d-assets/medalla-firma/build_medalla.py
 cd configurator && npm run build:all   # comprime el modelo y compila el configurador
+/Applications/Blender.app/Contents/MacOS/Blender --background --python 3d-assets/medalla-firma/render_giro.py -- /tmp/giro full
+python3 3d-assets/medalla-firma/frames_to_webp.py /tmp/giro   # cuadros del banner que gira
 cd configurator && npm run dev         # configurador aislado con Vite
 ```
 
 **Al conectar Shopify:** crear el producto "Medalla Firma" (handle
 `medalla-firma`) y asignarle la plantilla `joyeria-personalizada`; crear la
-página `contacto`; elegir ese producto y página en el header; llenar los datos
+página `contacto` y asignarle la plantilla `contacto` (Shopify no la aplica
+sola por el handle: se elige en "Plantilla de tema", y el menú solo muestra
+plantillas del tema publicado); elegir ese producto y página en el header; llenar los datos
 de contacto; revisar que Shopify acepte `medalla-firma.glb` en assets (si no,
 subirlo a Contenido → Archivos y pegar la URL en la sección del configurador).
 
