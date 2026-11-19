@@ -1,0 +1,68 @@
+{% doc %}
+  Responsive image with a theme-asset fallback. When the merchant has picked
+  an image in the editor it uses Shopify's CDN (image_url); until then it shows
+  the photo bundled in assets/ (the Figma stand-ins), so every section renders
+  complete out of the box.
+
+  @param {object} [image] - Image object from an image_picker setting or a product.
+  @param {string} [fallback] - Filename in assets/, e.g. 'mi-hero.jpg'.
+  @param {string} [alt] - Alt text (defaults to the image's own alt).
+  @param {string} [sizes] - sizes attribute. Defaults to 100vw.
+  @param {string} [class] - Class for the img element.
+  @param {boolean} [eager] - true for above-the-fold images.
+  @param {number} [max_width] - Largest width to request. Defaults to 2000.
+
+  @example
+  {% render 'mi-image', image: section.settings.image, fallback: 'mi-hero.jpg', alt: 'Retrato', eager: true %}
+{% enddoc %}
+{%- liquid
+  assign mi_sizes = sizes | default: '100vw'
+  assign mi_max = max_width | default: 2000
+  assign mi_loading = 'lazy'
+  assign mi_priority = 'auto'
+  if eager
+    assign mi_loading = 'eager'
+    assign mi_priority = 'high'
+  endif
+-%}
+{%- if image != blank -%}
+  {%- assign mi_alt = alt | default: image.alt | escape -%}
+  {%- assign mi_widths = '400, 600, 800, 1000, 1200, 1600, 2000' -%}
+  {{
+    image
+    | image_url: width: mi_max
+    | image_tag: loading: mi_loading, fetchpriority: mi_priority, sizes: mi_sizes, widths: mi_widths, class: class, alt: mi_alt
+  }}
+{%- elsif fallback != blank -%}
+  {%- liquid
+    assign mi_alt = alt | escape
+    assign src_400 = fallback | asset_img_url: '400x'
+    assign src_800 = fallback | asset_img_url: '800x'
+    assign src_1200 = fallback | asset_img_url: '1200x'
+    assign src_1800 = fallback | asset_img_url: '1800x'
+    # Intrinsic size of the bundled stand-in photos (see assets/mi-*.jpg)
+    assign fb_width = 1024
+    assign fb_height = 1024
+    case fallback
+      when 'mi-hero.jpg', 'mi-banner.jpg'
+        assign fb_width = 1792
+        assign fb_height = 768
+      when 'mi-editorial.jpg', 'mi-contacto.jpg', 'mi-par-texto.jpg', 'mi-par-imagen.jpg', 'mi-triptico.jpg', 'mi-tl-0.jpg', 'mi-tl-1.jpg', 'mi-tl-2.jpg', 'mi-tl-3.jpg', 'mi-tl-4.jpg', 'mi-tl-5.jpg'
+        assign fb_height = 1280
+    endcase
+  -%}
+  <img
+    src="{{ src_1200 }}"
+    srcset="{{ src_400 }} 400w, {{ src_800 }} 800w, {{ src_1200 }} 1200w, {{ src_1800 }} 1800w"
+    sizes="{{ mi_sizes }}"
+    alt="{{ mi_alt }}"
+    width="{{ fb_width }}"
+    height="{{ fb_height }}"
+    loading="{{ mi_loading }}"
+    fetchpriority="{{ mi_priority }}"
+    decoding="async"
+    {% if class != blank %}
+      class="{{ class }}"
+    {% endif %}
+  >
+{%- endif -%}

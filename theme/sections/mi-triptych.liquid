@@ -1,0 +1,136 @@
+{% comment %}
+  Tríptico (Figma 18:31 / mobile 23:22): three tall panels — sketch, photo,
+  sketch. Each panel is a block: a picked image wins, otherwise the bundled
+  asset (sketch SVGs exported from Figma, or the stand-in photo).
+  Mobile: horizontal scroll-snap row of 300 × 346 cards.
+{% endcomment %}
+
+<div class="mi-triptych" data-testid="mi-triptych-{{ section.id }}">
+  <div class="mi-triptych__track" role="list">
+    {%- for block in section.blocks -%}
+      {%- assign is_svg = false -%}
+      {%- if block.settings.image == blank and block.settings.fallback contains '.svg' -%}
+        {%- assign is_svg = true -%}
+      {%- endif -%}
+      <figure class="mi-triptych__panel mi-media" role="listitem" {{ block.shopify_attributes }} data-mi-reveal>
+        {%- if is_svg -%}
+          <img
+            src="{{ block.settings.fallback | asset_url }}"
+            alt="{{ block.settings.alt | escape }}"
+            width="427"
+            height="493"
+            loading="lazy"
+            decoding="async"
+          >
+        {%- else -%}
+          {% render 'mi-image',
+            image: block.settings.image,
+            fallback: block.settings.fallback,
+            alt: block.settings.alt,
+            sizes: '(min-width: 750px) 30vw, 300px',
+            max_width: 1200
+          %}
+        {%- endif -%}
+      </figure>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .mi-triptych {
+    padding-top: 16px;
+  }
+
+  .mi-triptych__track {
+    display: flex;
+    gap: 12px;
+    padding-inline: var(--mi-gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--mi-gutter);
+    scrollbar-width: none;
+  }
+
+  .mi-triptych__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mi-triptych__panel {
+    flex: 0 0 300px;
+    aspect-ratio: 427 / 493;
+    margin: 0;
+    scroll-snap-align: start;
+  }
+
+  .mi-triptych__panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-triptych {
+      padding-top: 48px;
+    }
+
+    .mi-triptych__track {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 32px;
+      overflow: visible;
+    }
+
+    .mi-triptych__panel {
+      flex: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MI · Tríptico",
+  "tag": "section",
+  "class": "mi-triptych-section",
+  "max_blocks": 3,
+  "blocks": [
+    {
+      "type": "panel",
+      "name": "Panel",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Imagen"
+        },
+        {
+          "type": "select",
+          "id": "fallback",
+          "label": "Imagen de muestra (si no eliges una)",
+          "options": [
+            { "value": "mi-boceto-medalla.svg", "label": "Boceto 01 — Medalla" },
+            { "value": "mi-triptico.jpg", "label": "Foto — medalla sobre piedra" },
+            { "value": "mi-boceto-sello.svg", "label": "Boceto 02 — Sello" }
+          ],
+          "default": "mi-triptico.jpg"
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "Texto alternativo",
+          "default": "Medalla de plata grabada sobre piedra oscura"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "MI · Tríptico",
+      "blocks": [
+        { "type": "panel", "settings": { "fallback": "mi-boceto-medalla.svg", "alt": "Boceto 01 — Medalla, frente" } },
+        { "type": "panel", "settings": { "fallback": "mi-triptico.jpg" } },
+        { "type": "panel", "settings": { "fallback": "mi-boceto-sello.svg", "alt": "Boceto 02 — Sello, frente y perfil" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,16 @@
+{
+  "sections": {
+    "mi_contact": {
+      "type": "mi-contact",
+      "settings": {
+        "eyebrow": "Contacto",
+        "heading": "Hablemos de tu pieza",
+        "intro": "Cuéntanos qué tienes en mente —una idea, una fecha, una duda sobre materiales— y te respondemos por correo o por WhatsApp.",
+        "image_alt": "Mesa de trabajo del taller con herramientas de joyería",
+        "success_text": "Gracias. Te respondemos pronto por correo o por WhatsApp.",
+        "whatsapp_message": "Hola, quiero hablar de una pieza personalizada."
+      }
+    }
+  },
+  "order": ["mi_contact"]
+}

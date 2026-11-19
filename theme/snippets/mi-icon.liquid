@@ -1,0 +1,13 @@
+{% doc %}
+  Inline SVG icon exported from Figma (assets/mi-icon-*.svg).
+
+  @param {string} name - Icon name: search, bag, plus, plus-sm, minus, close, upload, rotate, rotate-sm, expand.
+  @param {string} [class] - Extra classes for the wrapper.
+
+  @example
+  {% render 'mi-icon', name: 'bag' %}
+{% enddoc %}
+{%- assign mi_icon_file = 'mi-icon-' | append: name | append: '.svg' -%}
+<span class="mi-icon{% if class != blank %} {{ class }}{% endif %}" aria-hidden="true">
+  {{- mi_icon_file | inline_asset_content -}}
+</span>

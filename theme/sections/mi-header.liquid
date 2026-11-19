@@ -1,0 +1,343 @@
+{% comment %}
+  Header (Figma: "Header / Desktop" 17:62 and "Header / Mobile" 17:81).
+  Black promo strip + white bar: nav on the left, Ibarra Real Nova wordmark in
+  the center, "Bolsa (n)" on the right. On mobile the nav collapses into a
+  menu button that opens a full-height panel.
+
+  Mujer, Hombre and the search icon only show when the theme setting
+  "Mostrar tienda" is on. If a menu is picked in the editor it replaces the
+  built-in links (Shopify Admin → Navigation, once the store is connected).
+{% endcomment %}
+
+{%- liquid
+  assign configurator_url = '#'
+  if section.settings.configurator_product != blank
+    assign configurator_url = section.settings.configurator_product.url
+  endif
+  assign contact_url = section.settings.contact_page.url | default: '/pages/contacto'
+  assign menu = section.settings.menu
+-%}
+
+<mi-header class="mi-header" data-testid="mi-header">
+  {%- if section.settings.promo_text != blank -%}
+    <div class="mi-header__promo">
+      <p class="mi-label mi-header__promo-desktop">{{ section.settings.promo_text }}</p>
+      <p class="mi-label-sm mi-header__promo-mobile">
+        {{- section.settings.promo_text_mobile | default: section.settings.promo_text -}}
+      </p>
+    </div>
+  {%- endif -%}
+
+  <div class="mi-header__bar">
+    <button
+      type="button"
+      class="mi-header__menu-toggle"
+      aria-controls="MiMenu-{{ section.id }}"
+      aria-expanded="false"
+      data-mi-menu-open
+    >
+      {% render 'mi-icon', name: 'menu' %}
+      <span class="mi-visually-hidden">Abrir menú</span>
+    </button>
+
+    <nav class="mi-header__nav" aria-label="Principal">
+      <ul class="mi-header__links mi-label" role="list">
+        {%- if menu != blank and menu.links.size > 0 -%}
+          {%- for link in menu.links -%}
+            <li>
+              <a href="{{ link.url }}" {% if link.active %}aria-current="page"{% endif %}>{{ link.title }}</a>
+            </li>
+          {%- endfor -%}
+        {%- else -%}
+          {%- if settings.show_full_store -%}
+            <li><a href="{{ section.settings.women_collection.url | default: '/collections/mujer' }}">Mujer</a></li>
+            <li><a href="{{ section.settings.men_collection.url | default: '/collections/hombre' }}">Hombre</a></li>
+          {%- endif -%}
+          <li><a href="{{ configurator_url }}">Joyería personalizada</a></li>
+          <li><a href="{{ contact_url }}">Contacto</a></li>
+        {%- endif -%}
+      </ul>
+    </nav>
+
+    <a href="{{ routes.root_url }}" class="mi-header__wordmark mi-wordmark">{{ shop.name | default: 'Mila Ibarra' }}</a>
+
+    <div class="mi-header__utils">
+      {%- if settings.show_full_store -%}
+        <a href="{{ routes.search_url }}" class="mi-header__search">
+          {% render 'mi-icon', name: 'search' %}
+          <span class="mi-visually-hidden">Buscar</span>
+        </a>
+      {%- endif -%}
+      <a href="{{ routes.cart_url }}" class="mi-header__bag" data-mi-cart-open>
+        <span class="mi-label mi-header__bag-label">
+          Bolsa (<span data-mi-cart-count>{{ cart.item_count }}</span>)
+        </span>
+        {% render 'mi-icon', name: 'bag' %}
+        <span class="mi-visually-hidden">Abrir la bolsa</span>
+      </a>
+    </div>
+  </div>
+
+  <dialog class="mi-header__panel" id="MiMenu-{{ section.id }}" aria-label="Menú">
+    <div class="mi-header__panel-head">
+      <span class="mi-wordmark">{{ shop.name | default: 'Mila Ibarra' }}</span>
+      <button type="button" class="mi-header__panel-close" data-mi-menu-close>
+        {% render 'mi-icon', name: 'close' %}
+        <span class="mi-visually-hidden">Cerrar menú</span>
+      </button>
+    </div>
+    <ul class="mi-header__panel-links mi-h3" role="list">
+      {%- if menu != blank and menu.links.size > 0 -%}
+        {%- for link in menu.links -%}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {%- endfor -%}
+      {%- else -%}
+        {%- if settings.show_full_store -%}
+          <li><a href="{{ section.settings.women_collection.url | default: '/collections/mujer' }}">Mujer</a></li>
+          <li><a href="{{ section.settings.men_collection.url | default: '/collections/hombre' }}">Hombre</a></li>
+        {%- endif -%}
+        <li><a href="{{ configurator_url }}">Joyería personalizada</a></li>
+        <li><a href="{{ contact_url }}">Contacto</a></li>
+      {%- endif -%}
+    </ul>
+  </dialog>
+</mi-header>
+
+<script src="{{ 'mi-header.js' | asset_url }}" type="module" defer></script>
+
+{% stylesheet %}
+  /* The promo strip scrolls away; the white bar stays pinned. */
+  #header-group {
+    position: sticky;
+    top: calc(var(--mi-promo-height, 30px) * -1);
+    z-index: 30;
+  }
+
+  .mi-header {
+    display: block;
+    background: var(--mi-white);
+    --mi-promo-height: 30px;
+  }
+
+  .mi-header__promo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--mi-promo-height);
+    background: var(--mi-black);
+    color: var(--mi-white);
+    text-align: center;
+  }
+
+  .mi-header__promo p {
+    margin: 0;
+  }
+
+  .mi-header__promo-desktop {
+    display: none;
+  }
+
+  .mi-header__bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 60px;
+    padding-inline: var(--mi-gutter);
+    border-bottom: 1px solid var(--mi-line);
+    background: var(--mi-white);
+  }
+
+  .mi-header__menu-toggle,
+  .mi-header__panel-close {
+    justify-self: start;
+    display: inline-flex;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: var(--mi-ink);
+  }
+
+  .mi-header__menu-toggle .mi-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mi-header__nav {
+    display: none;
+  }
+
+  .mi-header__links {
+    display: flex;
+    gap: 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mi-header__links a,
+  .mi-header__utils a {
+    color: var(--mi-ink);
+    text-decoration: none;
+  }
+
+  .mi-header__links a:hover,
+  .mi-header__links a[aria-current='page'] {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .mi-header__wordmark {
+    color: var(--mi-ink);
+    text-decoration: none;
+  }
+
+  .mi-header__utils {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .mi-header__bag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mi-header__bag .mi-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mi-header__bag-label,
+  .mi-header__search {
+    display: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-header {
+      --mi-promo-height: 32px;
+    }
+
+    .mi-header__promo-desktop {
+      display: block;
+    }
+
+    .mi-header__promo-mobile {
+      display: none;
+    }
+
+    .mi-header__bar {
+      height: 88px;
+    }
+
+    .mi-header__menu-toggle {
+      display: none;
+    }
+
+    .mi-header__nav {
+      display: block;
+    }
+
+    .mi-header__bag-label,
+    .mi-header__search {
+      display: inline-flex;
+    }
+
+    .mi-header__bag .mi-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  /* Mobile menu panel */
+  .mi-header__panel {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    padding: 0 var(--mi-gutter);
+    border: 0;
+    background: var(--mi-white);
+    color: var(--mi-ink);
+  }
+
+  .mi-header__panel::backdrop {
+    background: var(--mi-scrim);
+  }
+
+  .mi-header__panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    border-bottom: 1px solid var(--mi-line);
+  }
+
+  .mi-header__panel-links {
+    margin: 0;
+    padding: 24px 0;
+    list-style: none;
+  }
+
+  .mi-header__panel-links li {
+    border-bottom: 1px solid var(--mi-line);
+  }
+
+  .mi-header__panel-links a {
+    display: block;
+    padding: 18px 0;
+    color: var(--mi-ink);
+    text-decoration: none;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Mila Ibarra · Header",
+  "tag": "header",
+  "class": "mi-header-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "promo_text",
+      "label": "Franja superior (escritorio)",
+      "default": "Joyería personalizada · Cada pieza se hace a la medida"
+    },
+    {
+      "type": "text",
+      "id": "promo_text_mobile",
+      "label": "Franja superior (celular)",
+      "default": "Cada pieza se hace a la medida"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menú",
+      "info": "Opcional. Si lo dejas vacío se usan los enlaces de lanzamiento (Joyería personalizada, Contacto; Mujer y Hombre al activar \"Mostrar tienda\")."
+    },
+    {
+      "type": "product",
+      "id": "configurator_product",
+      "label": "Producto de joyería personalizada"
+    },
+    {
+      "type": "page",
+      "id": "contact_page",
+      "label": "Página de contacto"
+    },
+    {
+      "type": "collection",
+      "id": "women_collection",
+      "label": "Colección Mujer"
+    },
+    {
+      "type": "collection",
+      "id": "men_collection",
+      "label": "Colección Hombre"
+    }
+  ]
+}
+{% endschema %}

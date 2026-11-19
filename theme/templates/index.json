@@ -1,282 +1,259 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
-    "hero_jVaWmY": {
-      "type": "hero",
+    "hero": {
+      "type": "mi-hero",
+      "settings": {
+        "fallback": "mi-hero.jpg",
+        "image_alt": "Mujer con una medalla grabada al cuello, a contraluz",
+        "eager": true,
+        "label": "Joyería personalizada",
+        "heading": "Grabada para quien la lleva",
+        "heading_tag": "h1",
+        "button_label": "Personalizar la tuya",
+        "button_link": "/products/medalla-firma",
+        "height_desktop": 680,
+        "height_mobile": 540,
+        "padding_top_desktop": 0,
+        "padding_top_mobile": 0
+      }
+    },
+    "triptico": {
+      "type": "mi-triptych",
       "blocks": {
-        "text_YLPk4p": {
-          "type": "text",
-          "name": "t:names.heading",
+        "boceto_medalla": {
+          "type": "panel",
           "settings": {
-            "text": "<p>Browse our latest products</p>",
-            "width": "fit-content",
-            "max_width": "normal",
-            "alignment": "left",
-            "type_preset": "h2",
-            "font": "var(--font-body--family)",
-            "font_size": "1rem",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "text_color": "{{ settings.color_palette.background }}",
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
+            "fallback": "mi-boceto-medalla.svg",
+            "alt": "Boceto 01 — Medalla, frente"
+          }
         },
-        "button_H9gpTf": {
-          "type": "button",
-          "name": "t:names.button",
+        "foto": {
+          "type": "panel",
           "settings": {
-            "label": "Shop all",
-            "link": "shopify://collections/all",
-            "open_in_new_tab": false,
-            "style_class": "button-custom",
-            "custom_button_background": "rgba(0, 0, 0, 0)",
-            "custom_button_text": "{{ settings.color_palette.background }}",
-            "custom_button_border": "{{ settings.color_palette.background }}",
-            "width": "fit-content",
-            "custom_width": 100,
-            "width_mobile": "fit-content",
-            "custom_width_mobile": 100
-          },
-          "blocks": {}
+            "fallback": "mi-triptico.jpg",
+            "alt": "Medalla de plata grabada sobre piedra oscura"
+          }
+        },
+        "boceto_sello": {
+          "type": "panel",
+          "settings": {
+            "fallback": "mi-boceto-sello.svg",
+            "alt": "Boceto 02 — Sello, frente y perfil"
+          }
         }
       },
       "block_order": [
-        "text_YLPk4p",
-        "button_H9gpTf"
-      ],
-      "name": "t:names.hero",
+        "boceto_medalla",
+        "foto",
+        "boceto_sello"
+      ]
+    },
+    "declaracion": {
+      "type": "mi-statement",
       "settings": {
-        "media_type_1": "image",
-        "media_type_2": "image",
-        "link": "",
-        "open_in_new_tab": false,
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "space-between",
-        "vertical_alignment": "flex-end",
-        "align_baseline": true,
-        "horizontal_alignment_flex_direction_column": "center",
-        "vertical_alignment_flex_direction_column": "flex-end",
-        "gap": 24,
-        "section_width": "page-width",
-        "section_height": "medium",
-        "section_height_custom": 50,
-        "toggle_overlay": true,
-        "overlay_color": "#12121266",
-        "overlay_style": "solid",
-        "gradient_direction": "to bottom",
-        "blurred_reflection": false,
-        "reflection_opacity": 75,
-        "padding-block-start": 100,
-        "padding-block-end": 72
+        "heading": "Una pieza escrita por ti",
+        "text": "Tus iniciales, una fecha o un dibujo: tú decides qué se graba y en qué metal. Lo ves en 3D antes de pedirlo y nosotros lo convertimos en una pieza que no existe en ningún otro lugar."
       }
     },
-    "product_list_fa6P9H": {
-      "type": "product-list",
+    "productos": {
+      "type": "mi-product-row",
+      "settings": {
+        "heading": "",
+        "count_label": "",
+        "padding_top": 0,
+        "padding_bottom": 0
+      },
       "blocks": {
-        "static-header": {
-          "type": "_product-list-content",
-          "name": "t:names.header",
-          "static": true,
+        "oro": {
+          "type": "card",
           "settings": {
-            "content_direction": "row",
-            "vertical_on_mobile": false,
-            "horizontal_alignment": "space-between",
-            "vertical_alignment": "flex-end",
-            "align_baseline": true,
-            "horizontal_alignment_flex_direction_column": "flex-start",
-            "vertical_alignment_flex_direction_column": "center",
-            "gap": 12,
-            "width": "fill",
-            "custom_width": 100,
-            "width_mobile": "fill",
-            "custom_width_mobile": 100,
-            "height": "fit",
-            "custom_height": 100,
-            "background_media": "none",
-            "video_position": "cover",
-            "background_image_position": "cover",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {
-            "product_list_text_YFtzcL": {
-              "type": "_product-list-text",
-              "name": "t:names.collection_title",
-              "settings": {
-                "text": "<h3>{{ closest.collection.title }}</h3>",
-                "width": "fit-content",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "h4",
-                "font": "var(--font-body--family)",
-                "font_size": "",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "product_list_button_MWeP9V": {
-              "type": "_product-list-button",
-              "name": "t:names.product_list_button",
-              "settings": {
-                "label": "View all",
-                "open_in_new_tab": false,
-                "style_class": "button-unstyled",
-                "width": "fit-content",
-                "custom_width": 100,
-                "width_mobile": "fit-content",
-                "custom_width_mobile": 100
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "product_list_text_YFtzcL",
-            "product_list_button_MWeP9V"
-          ]
+            "fallback": "mi-prod-oro.jpg",
+            "title": "Medalla Firma, oro, iniciales grabadas",
+            "price": "$0,000 MXN",
+            "tag": "A la medida",
+            "link": "/products/medalla-firma?material=oro"
+          }
         },
-        "static-product-card": {
-          "type": "_product-card",
-          "name": "t:names.product_card",
-          "static": true,
+        "plata": {
+          "type": "card",
           "settings": {
-            "product_card_gap": 4,
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {
-            "product_card_gallery_677WP3": {
-              "type": "_product-card-gallery",
-              "name": "t:names.product_card_media",
-              "settings": {
-                "image_ratio": "adapt",
-                "border": "none",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "product_title_YXxMTj": {
-              "type": "product-title",
-              "name": "t:names.product_title",
-              "settings": {
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "paragraph",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 4,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "price_JQzVV4": {
-              "type": "price",
-              "name": "t:names.product_price",
-              "settings": {
-                "show_sale_price_first": true,
-                "show_installments": false,
-                "show_tax_info": false,
-                "type_preset": "h6",
-                "width": "100%",
-                "alignment": "left",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "product_card_gallery_677WP3",
-            "product_title_YXxMTj",
-            "price_JQzVV4"
-          ]
+            "fallback": "mi-prod-plata.jpg",
+            "title": "Medalla Firma, plata, iniciales grabadas",
+            "price": "$0,000 MXN",
+            "tag": "A la medida",
+            "link": "/products/medalla-firma?material=plata"
+          }
+        },
+        "rosa": {
+          "type": "card",
+          "settings": {
+            "fallback": "mi-prod-rosa.jpg",
+            "title": "Medalla Firma, oro rosa, iniciales grabadas",
+            "price": "$0,000 MXN",
+            "tag": "A la medida",
+            "link": "/products/medalla-firma?material=oro-rosa"
+          }
+        },
+        "dibujo": {
+          "type": "card",
+          "settings": {
+            "fallback": "mi-prod-dibujo.jpg",
+            "title": "Medalla Firma, oro, con tu dibujo",
+            "price": "$0,000 MXN",
+            "tag": "A la medida",
+            "link": "/products/medalla-firma?material=oro&imagen=1"
+          }
         }
       },
-      "name": "t:names.featured_collection",
+      "block_order": [
+        "oro",
+        "plata",
+        "rosa",
+        "dibujo"
+      ]
+    },
+    "editorial": {
+      "type": "mi-editorial",
       "settings": {
-        "collection": "all",
-        "layout_type": "grid",
-        "carousel_on_mobile": false,
-        "max_products": 8,
-        "columns": 4,
-        "mobile_columns": "2",
-        "mobile_card_size": "60cqw",
-        "columns_gap": 8,
-        "rows_gap": 24,
-        "icons_style": "arrow",
-        "icons_shape": "none",
-        "section_width": "page-width",
-        "horizontal_alignment": "flex-start",
-        "gap": 28,
-        "padding-block-start": 48,
-        "padding-block-end": 48
+        "quote": "“Una joya no se elige: se escribe.”",
+        "image_alt": "Mujer tocando una medalla de oro grabada con sus iniciales",
+        "button_label": "Personalizar la tuya",
+        "button_link": "/products/medalla-firma",
+        "quote_2": "Empieza con algo tuyo —unas iniciales, una fecha, un trazo— y termina en una pieza que no existe en ningún otro lugar.",
+        "attribution": "— Mila Ibarra"
+      }
+    },
+    "dos_formas": {
+      "type": "mi-two-ways",
+      "blocks": {
+        "texto": {
+          "type": "way",
+          "settings": {
+            "fallback": "mi-par-texto.jpg",
+            "image_alt": "Medalla de oro con las iniciales M·I grabadas",
+            "button_label": "Escribir el tuyo",
+            "button_link": "/products/medalla-firma",
+            "label": "A · Texto",
+            "heading": "Tu texto, en nuestra letra",
+            "text": "Iniciales, una fecha o un nombre corto, en romana o en cursiva."
+          }
+        },
+        "imagen": {
+          "type": "way",
+          "settings": {
+            "fallback": "mi-par-imagen.jpg",
+            "image_alt": "Dibujo de una margarita junto a la medalla grabada con él",
+            "button_label": "Subir una imagen",
+            "button_link": "/products/medalla-firma?imagen=1",
+            "label": "B · Imagen",
+            "heading": "Tu dibujo, convertido en grabado",
+            "text": "Sube una imagen: la pasamos a escala de grises y el taller la revisa contigo."
+          }
+        }
+      },
+      "block_order": [
+        "texto",
+        "imagen"
+      ]
+    },
+    "banner": {
+      "type": "mi-hero",
+      "settings": {
+        "fallback": "mi-banner.jpg",
+        "image_alt": "Medalla de oro con iniciales grabadas sobre fondo negro",
+        "eager": false,
+        "label": "El configurador 3D",
+        "heading": "Mírala girar antes de pedirla",
+        "heading_tag": "h2",
+        "button_label": "Abrir el configurador",
+        "button_link": "/products/medalla-firma",
+        "height_desktop": 650,
+        "height_mobile": 520,
+        "padding_top_desktop": 96,
+        "padding_top_mobile": 0
+      }
+    },
+    "linea_de_tiempo": {
+      "type": "mi-timeline",
+      "blocks": {
+        "tl0": {
+          "type": "event",
+          "settings": {
+            "title": "Cómo nace tu pieza",
+            "text": "Del texto que escribes a la pieza que llevas puesta. Nada se produce sin que lo hayas visto antes.",
+            "fallback": "mi-tl-0.jpg"
+          }
+        },
+        "tl1": {
+          "type": "event",
+          "settings": {
+            "title": "Escríbela",
+            "text": "Iniciales, una fecha, un nombre corto o una imagen tuya.",
+            "fallback": "mi-tl-1.jpg"
+          }
+        },
+        "tl2": {
+          "type": "event",
+          "settings": {
+            "title": "Mírala en 3D",
+            "text": "La vista previa gira con tus cambios: texto, tipografía y material.",
+            "fallback": "mi-tl-2.jpg"
+          }
+        },
+        "tl3": {
+          "type": "event",
+          "settings": {
+            "title": "La revisamos contigo",
+            "text": "El taller revisa tu texto o tu imagen antes de producir.",
+            "fallback": "mi-tl-3.jpg"
+          }
+        },
+        "tl4": {
+          "type": "event",
+          "settings": {
+            "title": "Se fabrica",
+            "text": "El taller la produce [a mano o con láser — por confirmar].",
+            "fallback": "mi-tl-4.jpg"
+          }
+        },
+        "tl5": {
+          "type": "event",
+          "settings": {
+            "title": "Llega a ti",
+            "text": "En [TIEMPO DE ENTREGA], lista para llevar puesta.",
+            "fallback": "mi-tl-5.jpg"
+          }
+        }
+      },
+      "block_order": [
+        "tl0",
+        "tl1",
+        "tl2",
+        "tl3",
+        "tl4",
+        "tl5"
+      ]
+    },
+    "contacto": {
+      "type": "mi-cta-contact",
+      "settings": {
+        "label": "Contacto",
+        "heading": "¿Tienes una idea? Hablemos.",
+        "text": "Si lo que quieres grabar no cabe en el configurador, escríbenos y lo resolvemos contigo.",
+        "whatsapp_label": "WhatsApp Business",
+        "form_label": "Formulario de contacto"
       }
     }
   },
   "order": [
-    "hero_jVaWmY",
-    "product_list_fa6P9H"
+    "hero",
+    "triptico",
+    "declaracion",
+    "productos",
+    "editorial",
+    "dos_formas",
+    "banner",
+    "linea_de_tiempo",
+    "contacto"
   ]
 }

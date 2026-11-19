@@ -1,0 +1,92 @@
+{% comment %}
+  "Cómo funciona la vista previa" (Figma 20:237 laptop / 24:201 móvil):
+  tile-grey band with three numbered steps. Used under the configurator.
+{% endcomment %}
+
+<div class="mi-steps" data-testid="mi-steps-{{ section.id }}">
+  <ol class="mi-steps__list" role="list">
+    {%- for block in section.blocks -%}
+      <li class="mi-steps__item" {{ block.shopify_attributes }} data-mi-reveal>
+        <p class="mi-label mi-ink-3">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</p>
+        <h2 class="mi-h3">{{ block.settings.title }}</h2>
+        <p class="mi-body mi-ink-2">{{ block.settings.text }}</p>
+      </li>
+    {%- endfor -%}
+  </ol>
+</div>
+
+{% stylesheet %}
+  .mi-steps {
+    margin-top: 64px;
+    padding: 48px var(--mi-gutter);
+    background: var(--mi-tile);
+  }
+
+  .mi-steps__list {
+    display: grid;
+    gap: 32px;
+    max-width: calc(var(--mi-max-width) - 2 * var(--mi-gutter));
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mi-steps__item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mi-steps__item p,
+  .mi-steps__item h2 {
+    margin: 0;
+  }
+
+  .mi-steps__item .mi-body {
+    max-width: 360px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-steps {
+      margin-top: 96px;
+      padding-block: 72px;
+    }
+
+    .mi-steps__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 48px;
+    }
+
+    .mi-steps__item {
+      gap: 10px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MI · Pasos",
+  "tag": "section",
+  "class": "mi-steps-section",
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Paso",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Título", "default": "Lo que ves es lo que se graba" },
+        { "type": "textarea", "id": "text", "label": "Texto", "default": "Cada cambio de texto, tipografía o material se refleja al instante en la pieza." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "MI · Pasos",
+      "blocks": [
+        { "type": "step" },
+        { "type": "step", "settings": { "title": "El taller lo revisa contigo", "text": "Antes de producir revisamos tu texto o tu imagen para que quede como la imaginaste." } },
+        { "type": "step", "settings": { "title": "Llega al pedido tal cual", "text": "Tu texto, tu tipografía y tu material viajan con el pedido: el taller recibe exactamente lo que aprobaste." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

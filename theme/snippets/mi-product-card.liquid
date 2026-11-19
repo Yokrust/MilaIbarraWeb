@@ -1,0 +1,115 @@
+{% doc %}
+  "Product card" (Figma: 01 · Sistema). Light-grey tile, square media with an
+  optional tag, then title + price. Works with a real product or with static
+  values (the Home / configurator rows of the four Medalla Firma versions,
+  which are presets of the same configurable product).
+
+  @param {object} [product] - Shopify product. When present, its title, price, URL and featured image win.
+  @param {string} [title] - Static title.
+  @param {string} [price] - Static price text (e.g. '$0,000 MXN').
+  @param {string} [url] - Static link.
+  @param {object} [image] - Image object override.
+  @param {string} [fallback] - Asset filename used when there is no image.
+  @param {string} [tag] - Tag text, e.g. 'A la medida' or 'Nuevo'.
+  @param {string} [sizes] - sizes attribute for the image.
+
+  @example
+  {% render 'mi-product-card', product: product, tag: 'Nuevo' %}
+{% enddoc %}
+{%- liquid
+  assign card_title = title
+  assign card_price = price
+  assign card_url = url | default: '#'
+  assign card_image = image
+  assign card_tag = tag
+  if product != blank
+    assign card_title = product.title
+    assign card_price = product.price | money_with_currency
+    assign card_url = product.url
+    if card_image == blank
+      assign card_image = product.featured_image
+    endif
+    if card_tag == blank and product.tags contains 'a-la-medida'
+      assign card_tag = 'A la medida'
+    endif
+  endif
+  assign card_sizes = sizes | default: '(min-width: 750px) 25vw, 50vw'
+-%}
+<a class="mi-card" href="{{ card_url }}">
+  <div class="mi-card__media">
+    {% render 'mi-image', image: card_image, fallback: fallback, alt: card_title, sizes: card_sizes, class: 'mi-card__img', max_width: 900 %}
+    {%- if card_tag != blank -%}
+      <span class="mi-tag mi-label-sm mi-card__tag">{{ card_tag }}</span>
+    {%- endif -%}
+  </div>
+  <div class="mi-card__info mi-body">
+    <p class="mi-card__title mi-ink-2">{{ card_title }}</p>
+    {%- if card_price != blank -%}
+      <p class="mi-card__price">{{ card_price }}</p>
+    {%- endif -%}
+  </div>
+</a>
+
+{% stylesheet %}
+  .mi-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--mi-tile);
+    color: var(--mi-ink);
+    text-decoration: none;
+    height: 100%;
+  }
+
+  .mi-card__media {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+  }
+
+  .mi-card__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .mi-card:hover .mi-card__img {
+    transform: scale(1.03);
+  }
+
+  .mi-card__tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+
+  .mi-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 10px 12px;
+  }
+
+  .mi-card__info p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .mi-card__info {
+      font-size: 12px;
+      line-height: 17px;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-card__tag {
+      top: 16px;
+      left: 16px;
+    }
+
+    .mi-card__info {
+      padding: 0 16px 16px;
+    }
+  }
+{% endstylesheet %}

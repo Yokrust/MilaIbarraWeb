@@ -1,0 +1,73 @@
+{% comment %}
+  Declaración (Figma 18:65 / mobile 23:56): centered H2 + short paragraph.
+{% endcomment %}
+
+<div class="mi-statement" data-testid="mi-statement-{{ section.id }}" data-mi-reveal>
+  {%- if section.settings.heading != blank -%}
+    <h2 class="mi-h2 mi-statement__heading">{{ section.settings.heading }}</h2>
+  {%- endif -%}
+  {%- if section.settings.text != blank -%}
+    <p class="mi-body mi-statement__text">{{ section.settings.text }}</p>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .mi-statement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 56px var(--mi-gutter);
+    text-align: center;
+    color: var(--mi-ink);
+  }
+
+  .mi-statement__heading {
+    max-width: 640px;
+  }
+
+  .mi-statement__text {
+    max-width: 533px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .mi-statement__heading,
+    .mi-statement__text {
+      max-width: 322px;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-statement {
+      gap: 20px;
+      padding-block: 72px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MI · Declaración",
+  "tag": "section",
+  "class": "mi-statement-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Una pieza escrita por ti"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Texto",
+      "default": "Tus iniciales, una fecha o un dibujo: tú decides qué se graba y en qué metal. Lo ves en 3D antes de pedirlo y nosotros lo convertimos en una pieza que no existe en ningún otro lugar."
+    }
+  ],
+  "presets": [
+    {
+      "name": "MI · Declaración"
+    }
+  ]
+}
+{% endschema %}

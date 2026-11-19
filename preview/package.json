@@ -1,0 +1,11 @@
+{
+  "name": "mila-ibarra-theme-preview",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "node server.js"
+  },
+  "dependencies": {
+    "liquidjs": "^10.19.0"
+  }
+}

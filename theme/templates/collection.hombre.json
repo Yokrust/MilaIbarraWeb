@@ -1,0 +1,47 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "mi-collection",
+      "blocks": {
+        "editorial_1": {
+          "type": "editorial",
+          "settings": {
+            "position": 5,
+            "fallback": "mi-editorial.jpg",
+            "eyebrow": "Joyería personalizada",
+            "heading": "Grabada para quien la lleva",
+            "button_label": "Personalizar la tuya",
+            "link": ""
+          }
+        },
+        "editorial_2": {
+          "type": "editorial",
+          "settings": {
+            "position": 9,
+            "fallback": "mi-par-imagen.jpg",
+            "eyebrow": "B · Imagen",
+            "heading": "Tu dibujo, convertido en grabado",
+            "button_label": "Ver cómo funciona",
+            "link": "/#como-funciona"
+          }
+        }
+      },
+      "block_order": ["editorial_1", "editorial_2"],
+      "settings": {
+        "eyebrow": "Colección",
+        "fallback_description": "Piezas para llevar todos los días. Las que llevan el sello “A la medida” pueden grabarse.",
+        "products_per_page": 12
+      }
+    }
+  },
+  "order": ["main"]
+}

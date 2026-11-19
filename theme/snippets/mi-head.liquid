@@ -1,0 +1,59 @@
+{% doc %}
+  Mila Ibarra head assets: self-hosted fonts (Host Grotesk + Ibarra Real Nova,
+  both OFL, from Google Fonts), the v2 tokens stylesheet and the site-wide
+  scroll-reveal component. Rendered from layout/theme.liquid after Horizon's
+  own styles so these win the cascade.
+
+  Also keeps the not-yet-launched store templates (Hombre, Mujer, catálogo,
+  producto estándar) out of search engines until "Mostrar tienda" is on.
+{% enddoc %}
+
+{{ 'host-grotesk-var.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+{{ 'ibarra-real-nova-regular.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+
+<style>
+  @font-face {
+    font-family: 'Host Grotesk';
+    font-style: normal;
+    font-weight: 300 800;
+    font-display: swap;
+    src: url('{{ 'host-grotesk-var.woff2' | asset_url }}') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'Ibarra Real Nova';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('{{ 'ibarra-real-nova-regular.woff2' | asset_url }}') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'Ibarra Real Nova';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('{{ 'ibarra-real-nova-italic.woff2' | asset_url }}') format('woff2');
+  }
+</style>
+
+{{ 'mi-tokens.css' | asset_url | stylesheet_tag }}
+
+<script>
+  document.documentElement.classList.add('mi-js');
+</script>
+<script src="{{ 'mi-reveal.js' | asset_url }}" type="module" defer></script>
+
+{%- liquid
+  assign mi_unlaunched = false
+  unless settings.show_full_store
+    if request.page_type == 'collection' or request.page_type == 'list-collections' or request.page_type == 'search'
+      assign mi_unlaunched = true
+    elsif request.page_type == 'product' and template.suffix != 'joyeria-personalizada'
+      assign mi_unlaunched = true
+    endif
+  endunless
+-%}
+{%- if mi_unlaunched -%}
+  <meta name="robots" content="noindex, nofollow">
+{%- endif -%}

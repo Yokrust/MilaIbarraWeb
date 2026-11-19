@@ -1,0 +1,10 @@
+{% doc %}
+  Scripts for the configurator template only. The form/state machine and the
+  viewer shell are small and load right away; the Three.js bundle
+  (assets/configurator.js) is imported later by the viewer, only when WebGL is
+  available and the viewer is near the viewport — so Three.js never ships on
+  any other page.
+{% enddoc %}
+
+<script src="{{ 'mi-configurator-form.js' | asset_url }}" type="module" defer></script>
+<script src="{{ 'mi-configurator-loader.js' | asset_url }}" type="module" defer></script>

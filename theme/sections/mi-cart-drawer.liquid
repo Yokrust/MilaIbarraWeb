@@ -1,0 +1,457 @@
+{% comment %}
+  Cart drawer (Figma: "Carrito (drawer) — Laptop 1440" 21:278 / 21:301 and
+  "Carrito — Móvil 390" 24:329). 480px panel on the right with a scrim on
+  desktop, full screen on mobile.
+
+  Rendered once from layout/theme.liquid ({% section 'mi-cart-drawer' %}) and
+  re-rendered through the Section Rendering API (?sections=mi-cart-drawer)
+  by assets/mi-cart-drawer.js after every change.
+
+  Line item properties (Texto, Tipografía, Material…) are listed under each
+  item; keys that start with "_" are technical and stay hidden.
+{% endcomment %}
+
+<mi-cart-drawer class="mi-cart" data-testid="mi-cart-drawer">
+  <dialog class="mi-cart__dialog" aria-labelledby="MiCartTitle" data-mi-cart-dialog>
+    <div class="mi-cart__panel" data-mi-cart-content>
+      <div class="mi-cart__head">
+        <h2 class="mi-title" id="MiCartTitle">
+          {{ section.settings.title | default: 'Tu bolsa' }} ({{ cart.item_count }})
+        </h2>
+        <button type="button" class="mi-cart__close" data-mi-cart-close>
+          {% render 'mi-icon', name: 'close' %}
+          <span class="mi-visually-hidden">Cerrar la bolsa</span>
+        </button>
+      </div>
+
+      {%- if cart.item_count > 0 -%}
+        <div class="mi-cart__body">
+          <ul class="mi-cart__items" role="list">
+            {%- for item in cart.items -%}
+              <li class="mi-cart__item" data-mi-cart-line="{{ forloop.index }}" data-key="{{ item.key }}">
+                <a href="{{ item.url }}" class="mi-cart__thumb">
+                  {%- if item.image -%}
+                    {{
+                      item.image
+                      | image_url: width: 240
+                      | image_tag: loading: 'lazy', sizes: '104px', widths: '120, 240', alt: item.product.title
+                    }}
+                  {%- else -%}
+                    {% render 'mi-image', fallback: 'mi-prod-oro.jpg', alt: item.product.title, sizes: '104px' %}
+                  {%- endif -%}
+                </a>
+
+                <div class="mi-cart__info">
+                  <div class="mi-cart__title-row mi-title">
+                    <a href="{{ item.url }}">{{ item.product.title }}</a>
+                    <span>{{ item.final_line_price | money_with_currency }}</span>
+                  </div>
+
+                  {%- liquid
+                    assign has_details = false
+                    unless item.product.has_only_default_variant
+                      assign has_details = true
+                    endunless
+                    for property in item.properties
+                      assign first_char = property.first | slice: 0
+                      if property.last != blank and first_char != '_'
+                        assign has_details = true
+                      endif
+                    endfor
+                  -%}
+                  {%- if has_details -%}
+                    <ul class="mi-cart__props mi-body mi-ink-2" role="list">
+                      {%- unless item.product.has_only_default_variant -%}
+                        {%- for option in item.options_with_values -%}
+                          <li>{{ option.name }}: {{ option.value }}</li>
+                        {%- endfor -%}
+                      {%- endunless -%}
+                      {%- for property in item.properties -%}
+                        {%- assign first_char = property.first | slice: 0 -%}
+                        {%- if property.last != blank and first_char != '_' -%}
+                          <li>{{ property.first }}: {{ property.last }}</li>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+
+                  <div class="mi-cart__actions">
+                    <div class="mi-cart__qty">
+                      <button
+                        type="button"
+                        class="mi-cart__qty-btn"
+                        data-mi-cart-qty="{{ item.quantity | minus: 1 }}"
+                        aria-label="Quitar una unidad de {{ item.product.title | escape }}"
+                      >
+                        {% render 'mi-icon', name: 'minus' %}
+                      </button>
+                      <span class="mi-body" aria-live="polite">{{ item.quantity }}</span>
+                      <button
+                        type="button"
+                        class="mi-cart__qty-btn"
+                        data-mi-cart-qty="{{ item.quantity | plus: 1 }}"
+                        aria-label="Agregar una unidad de {{ item.product.title | escape }}"
+                      >
+                        {% render 'mi-icon', name: 'plus-sm' %}
+                      </button>
+                    </div>
+                    <button type="button" class="mi-link mi-label mi-ink-3" data-mi-cart-qty="0">Quitar</button>
+                  </div>
+                </div>
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          {%- if section.settings.note_heading != blank or section.settings.note_text != blank -%}
+            <div class="mi-cart__note">
+              <p class="mi-label">{{ section.settings.note_heading }}</p>
+              <p class="mi-body mi-ink-2">{{ section.settings.note_text }}</p>
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="mi-cart__foot">
+          <div class="mi-cart__subtotal">
+            <span class="mi-label">Subtotal</span>
+            <span class="mi-title">{{ cart.total_price | money_with_currency }}</span>
+          </div>
+          <p class="mi-body mi-ink-3">{{ section.settings.tax_note }}</p>
+          <form action="{{ routes.cart_url }}" method="post" class="mi-cart__checkout">
+            <button type="submit" name="checkout" class="mi-btn mi-btn--primary mi-btn--block">Finalizar compra</button>
+          </form>
+          <button type="button" class="mi-link mi-label mi-ink-3" data-mi-cart-close>Seguir comprando</button>
+        </div>
+      {%- else -%}
+        <div class="mi-cart__empty">
+          <p class="mi-body-lg">Tu bolsa está vacía.</p>
+          <p class="mi-body mi-ink-2">Escribe tus iniciales, elige el metal y mira tu pieza girar en 3D.</p>
+          {%- if section.settings.empty_link != blank -%}
+            <a href="{{ section.settings.empty_link }}" class="mi-btn mi-btn--primary">{{ section.settings.empty_label }}</a>
+          {%- else -%}
+            <button type="button" class="mi-btn mi-btn--secondary" data-mi-cart-close>Seguir comprando</button>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <p class="mi-visually-hidden" role="status" data-mi-cart-status></p>
+    </div>
+  </dialog>
+</mi-cart-drawer>
+
+<script src="{{ 'mi-cart-drawer.js' | asset_url }}" type="module" defer></script>
+
+{% stylesheet %}
+  .mi-cart__dialog {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--mi-white);
+    color: var(--mi-ink);
+    overflow: hidden;
+  }
+
+  .mi-cart__dialog::backdrop {
+    background: var(--mi-scrim);
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-cart__dialog {
+      width: 480px;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mi-cart__dialog[open] {
+      animation: mi-cart-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    .mi-cart__dialog[open]::backdrop {
+      animation: mi-cart-fade 0.35s ease;
+    }
+  }
+
+  @keyframes mi-cart-in {
+    from {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes mi-cart-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .mi-cart__panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .mi-cart__head {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--mi-line);
+  }
+
+  .mi-cart__head h2 {
+    margin: 0;
+  }
+
+  .mi-cart__close {
+    display: inline-flex;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .mi-cart__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 0;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  .mi-cart__items {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mi-cart__item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: opacity 0.2s ease;
+  }
+
+  .mi-cart__item.is-updating {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .mi-cart__thumb {
+    flex: 0 0 88px;
+    width: 88px;
+    height: 88px;
+    overflow: hidden;
+    background: var(--mi-tile);
+  }
+
+  .mi-cart__thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mi-cart__info {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .mi-cart__title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .mi-cart__title-row a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .mi-cart__title-row span {
+    white-space: nowrap;
+  }
+
+  .mi-cart__props {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mi-cart__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 4px;
+  }
+
+  .mi-cart__qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--mi-line);
+  }
+
+  .mi-cart__qty-btn {
+    display: inline-flex;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .mi-cart__note {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    background: var(--mi-tile);
+  }
+
+  .mi-cart__note p {
+    margin: 0;
+  }
+
+  .mi-cart__foot {
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-top: 1px solid var(--mi-line);
+  }
+
+  .mi-cart__foot > p {
+    align-self: stretch;
+    margin: 0;
+  }
+
+  .mi-cart__subtotal {
+    display: flex;
+    align-self: stretch;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mi-cart__checkout {
+    align-self: stretch;
+  }
+
+  .mi-cart__empty {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .mi-cart__empty p {
+    margin: 0;
+  }
+
+  .mi-cart__empty .mi-btn {
+    margin-top: 12px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-cart__head {
+      height: 72px;
+      padding: 0 24px;
+    }
+
+    .mi-cart__body {
+      gap: 24px;
+      padding: 24px;
+    }
+
+    .mi-cart__item {
+      gap: 16px;
+    }
+
+    .mi-cart__thumb {
+      flex-basis: 104px;
+      width: 104px;
+      height: 104px;
+    }
+
+    .mi-cart__info {
+      gap: 10px;
+    }
+
+    .mi-cart__actions {
+      padding-top: 6px;
+    }
+
+    .mi-cart__foot {
+      gap: 14px;
+      padding: 24px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Mila Ibarra · Bolsa",
+  "tag": "div",
+  "class": "mi-cart-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Tu bolsa"
+    },
+    {
+      "type": "text",
+      "id": "note_heading",
+      "label": "Nota — título",
+      "default": "Revisión del taller"
+    },
+    {
+      "type": "textarea",
+      "id": "note_text",
+      "label": "Nota — texto",
+      "default": "Antes de producir revisamos tu diseño contigo. Te escribiremos al correo de tu pedido."
+    },
+    {
+      "type": "text",
+      "id": "tax_note",
+      "label": "Aviso de envío e impuestos",
+      "default": "El envío y los impuestos se calculan al pagar."
+    },
+    {
+      "type": "text",
+      "id": "empty_label",
+      "label": "Bolsa vacía — texto del botón",
+      "default": "Personalizar la tuya"
+    },
+    {
+      "type": "url",
+      "id": "empty_link",
+      "label": "Bolsa vacía — enlace del botón"
+    }
+  ]
+}
+{% endschema %}

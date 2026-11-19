@@ -1,0 +1,281 @@
+{% comment %}
+  Footer (Figma: "Footer / Desktop" 17:91 and "Footer / Mobile" 17:118).
+  Wordmark + short line on the left, three link columns on the right, legal
+  row below. On mobile the columns become accordions.
+
+  Link columns are blocks. Contact details (WhatsApp, e-mail) come from the
+  global theme settings "Mila Ibarra — Contacto" so they are typed once.
+{% endcomment %}
+
+<div class="mi-footer" data-testid="mi-footer">
+  <div class="mi-footer__top">
+    <div class="mi-footer__brand">
+      <a href="{{ routes.root_url }}" class="mi-wordmark mi-footer__wordmark">{{ shop.name | default: 'Mila Ibarra' }}</a>
+      {%- if section.settings.tagline != blank -%}
+        <p class="mi-body mi-ink-2 mi-footer__tagline">{{ section.settings.tagline }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="mi-footer__columns">
+      {%- for block in section.blocks -%}
+        <details class="mi-footer__column" {{ block.shopify_attributes }} data-mi-footer-column>
+          <summary class="mi-footer__heading mi-label">
+            {{ block.settings.heading }}
+            {% render 'mi-icon', name: 'plus' %}
+          </summary>
+          <ul class="mi-footer__links mi-body mi-ink-2" role="list">
+            {%- if block.settings.menu != blank -%}
+              {%- for link in block.settings.menu.links -%}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+              {%- endfor -%}
+            {%- else -%}
+              {%- for i in (1..3) -%}
+                {%- liquid
+                  assign label_key = 'link_' | append: i | append: '_label'
+                  assign url_key = 'link_' | append: i | append: '_url'
+                  assign label = block.settings[label_key]
+                  assign link_url = block.settings[url_key]
+                -%}
+                {%- if label != blank -%}
+                  <li>
+                    {%- case link_url -%}
+                      {%- when 'whatsapp' -%}
+                        <a href="https://wa.me/{{ settings.mi_whatsapp_number | remove: ' ' | remove: '+' | remove: '-' }}" target="_blank" rel="noopener">{{ label }}</a>
+                      {%- when 'email' -%}
+                        <a href="mailto:{{ settings.mi_email }}">{{ settings.mi_email | default: label }}</a>
+                      {%- else -%}
+                        <a href="{{ link_url | default: '#' }}">{{ label }}</a>
+                    {%- endcase -%}
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          </ul>
+        </details>
+      {%- endfor -%}
+    </div>
+  </div>
+
+  <div class="mi-footer__legal mi-body mi-ink-3">
+    <p>© {{ 'now' | date: '%Y' }} {{ shop.name | default: 'Mila Ibarra' }}</p>
+    <p>
+      {%- if shop.privacy_policy -%}
+        <a href="{{ shop.privacy_policy.url }}">Aviso de privacidad</a>
+      {%- else -%}
+        <span>Aviso de privacidad</span>
+      {%- endif -%}
+      <span class="mi-footer__legal-terms">
+        ·
+        {%- if shop.terms_of_service %}
+          <a href="{{ shop.terms_of_service.url }}">Términos y condiciones</a>
+        {%- else %}
+          <span>Términos y condiciones</span>
+        {%- endif -%}
+      </span>
+    </p>
+  </div>
+</div>
+
+<script>
+  // Columns are open on desktop and collapsible (accordions) on mobile.
+  (function () {
+    const query = window.matchMedia('(min-width: 750px)');
+    const sync = () => {
+      document.querySelectorAll('[data-mi-footer-column]').forEach((column) => {
+        column.open = query.matches;
+      });
+    };
+    sync();
+    query.addEventListener('change', sync);
+  })();
+</script>
+
+{% stylesheet %}
+  .mi-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 48px var(--mi-gutter) 24px;
+    border-top: 1px solid var(--mi-line);
+    background: var(--mi-white);
+    color: var(--mi-ink);
+  }
+
+  .mi-footer a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .mi-footer a:hover {
+    color: var(--mi-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .mi-footer__top {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .mi-footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mi-footer__tagline {
+    max-width: 340px;
+  }
+
+  .mi-footer__columns {
+    border-bottom: 1px solid var(--mi-line);
+  }
+
+  .mi-footer__column {
+    border-top: 1px solid var(--mi-line);
+  }
+
+  .mi-footer__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .mi-footer__heading::-webkit-details-marker {
+    display: none;
+  }
+
+  .mi-footer__column[open] .mi-footer__heading .mi-icon {
+    transform: rotate(45deg);
+  }
+
+  .mi-footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0 0 20px;
+    list-style: none;
+  }
+
+  .mi-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    justify-content: space-between;
+  }
+
+  .mi-footer__legal p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .mi-footer__legal {
+      justify-content: flex-start;
+    }
+
+    .mi-footer__legal-terms {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-footer {
+      gap: 72px;
+      padding-top: 72px;
+      padding-bottom: 32px;
+    }
+
+    .mi-footer__top {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .mi-footer__brand {
+      gap: 20px;
+      width: 420px;
+    }
+
+    .mi-footer__columns {
+      display: flex;
+      gap: 96px;
+      border-bottom: 0;
+    }
+
+    .mi-footer__column {
+      border-top: 0;
+    }
+
+    .mi-footer__heading {
+      height: auto;
+      margin-bottom: 12px;
+      pointer-events: none;
+    }
+
+    .mi-footer__heading .mi-icon {
+      display: none;
+    }
+
+    .mi-footer__links {
+      padding: 0;
+      white-space: nowrap;
+    }
+
+    .mi-footer__legal {
+      padding-top: 24px;
+      border-top: 1px solid var(--mi-line);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Mila Ibarra · Footer",
+  "tag": "div",
+  "class": "mi-footer-section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "tagline",
+      "label": "Texto de marca",
+      "default": "Joyería personalizada, hecha a la medida. Escribes lo que quieres decir y nosotros lo grabamos en una pieza que es solo tuya."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Columna de enlaces",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Título",
+          "default": "Tienda"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menú",
+          "info": "Opcional. Si lo dejas vacío se usan los tres enlaces de abajo."
+        },
+        {
+          "type": "paragraph",
+          "content": "En la URL puedes escribir \"whatsapp\" o \"email\" para usar los datos de Ajustes del tema → Mila Ibarra — Contacto."
+        },
+        { "type": "text", "id": "link_1_label", "label": "Enlace 1 — texto" },
+        { "type": "text", "id": "link_1_url", "label": "Enlace 1 — URL" },
+        { "type": "text", "id": "link_2_label", "label": "Enlace 2 — texto" },
+        { "type": "text", "id": "link_2_url", "label": "Enlace 2 — URL" },
+        { "type": "text", "id": "link_3_label", "label": "Enlace 3 — texto" },
+        { "type": "text", "id": "link_3_url", "label": "Enlace 3 — URL" }
+      ]
+    }
+  ]
+}
+{% endschema %}

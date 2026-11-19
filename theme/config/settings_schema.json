@@ -2117,5 +2117,52 @@
         "default": "equal-width-buttons"
       }
     ]
+  },
+  {
+    "name": "Mila Ibarra — Tienda",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Al activar este interruptor, Hombre, Mujer y el catálogo aparecen en la navegación y en la home. Las plantillas ya están construidas; esto solo las enlaza."
+      },
+      {
+        "type": "checkbox",
+        "id": "show_full_store",
+        "label": "Mostrar tienda (Hombre, Mujer, Catálogo)",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Contacto"
+      },
+      {
+        "type": "paragraph",
+        "content": "Datos pendientes del cliente. Se usan en el header, footer, contacto, configurador y carrito."
+      },
+      {
+        "type": "text",
+        "id": "mi_whatsapp_number",
+        "label": "WhatsApp Business (con código de país)",
+        "placeholder": "52 662 000 0000"
+      },
+      {
+        "type": "text",
+        "id": "mi_email",
+        "label": "Correo de contacto",
+        "default": "[CORREO]"
+      },
+      {
+        "type": "text",
+        "id": "mi_delivery_time",
+        "label": "Tiempo de entrega",
+        "default": "[TIEMPO DE ENTREGA]"
+      },
+      {
+        "type": "text",
+        "id": "mi_response_time",
+        "label": "Tiempo de respuesta",
+        "default": "[TIEMPO DE RESPUESTA]"
+      }
+    ]
   }
 ]

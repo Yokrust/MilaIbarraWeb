@@ -7,9 +7,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:theme": "vite build && cp dist/configurator.js ../theme/assets/configurator.js"
+    "build:theme": "vite build && cp dist/configurator.js ../theme/assets/configurator.js",
+    "build:model": "gltfpack -i ../3d-assets/medalla-firma/medalla-firma.raw.glb -o ../theme/assets/medalla-firma.glb -cc -kn -km -kv -vtf",
+    "build:all": "npm run build:model && npm run build:theme"
   },
   "devDependencies": {
+    "gltfpack": "^1.3.0",
     "vite": "^6.0.0"
   },
   "dependencies": {

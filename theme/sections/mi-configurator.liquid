@@ -1,0 +1,851 @@
+{% comment %}
+  "Joyería personalizada" product page (Figma: 20:121 laptop, 24:100 móvil).
+  Left: live 3D viewer (Three.js canvas) + thumbnails. Right: the four steps
+  (texto, tipografía, material, imagen propia — próximamente), summary,
+  add to cart, accordions.
+
+  Each choice is a line item property (properties[Texto], properties[Tipografía],
+  properties[Material]) so it reaches the cart, checkout and the order in the
+  admin — no server of our own. Quick-buy and "Comprar ahora" are deliberately
+  absent: the properties must be filled first.
+
+  JS: assets/mi-configurator-form.js (state + add to cart) and
+  assets/mi-configurator-loader.js (viewer, lazy Three.js, thumbnails).
+{% endcomment %}
+
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign can_add = false
+  if variant.available
+    assign can_add = true
+  endif
+  assign price = variant.price | default: product.price | money_with_currency
+  assign description = section.settings.description
+  if description == blank
+    assign description = product.description | strip_html | truncatewords: 30
+  endif
+  assign model_url = section.settings.model_url
+  if model_url == blank
+    assign model_url = 'medalla-firma.glb' | asset_url
+  endif
+  assign max_chars = section.settings.max_chars
+-%}
+
+<section
+  class="mi-configurator"
+  data-mi-configurator-root
+  data-testid="mi-configurator-{{ section.id }}"
+>
+  <nav class="mi-breadcrumbs mi-body mi-configurator__crumbs" aria-label="Migas de pan">
+    <a href="{{ routes.root_url }}">Inicio</a>
+    <span aria-hidden="true">/</span>
+    <span class="mi-configurator__crumb-collection">Joyería personalizada</span>
+    <span class="mi-configurator__crumb-product" aria-hidden="true">/</span>
+    <span class="mi-configurator__crumb-product" aria-current="page">{{ product.title }}</span>
+  </nav>
+
+  <div class="mi-configurator__layout">
+    <mi-configurator
+      class="mi-configurator__gallery"
+      data-src="{{ 'configurator.js' | asset_url }}"
+      data-model="{{ model_url }}"
+    >
+      <div class="mi-configurator__viewer" data-mi-configurator-viewer>
+        <div class="mi-configurator__stage" data-mi-configurator-stage></div>
+
+        {%- liquid
+          assign src_oro = 'mi-visor.jpg' | asset_img_url: '1200x'
+          assign src_plata = 'mi-prod-plata.jpg' | asset_img_url: '1200x'
+          assign src_rosa = 'mi-prod-rosa.jpg' | asset_img_url: '1200x'
+          if section.settings.fallback_image != blank
+            assign src_oro = section.settings.fallback_image | image_url: width: 1200
+          endif
+        -%}
+        <img
+          class="mi-configurator__fallback"
+          src="{{ src_oro }}"
+          alt="{{ product.title | escape }} — vista previa"
+          width="1024"
+          height="1024"
+          fetchpriority="high"
+          data-mi-configurator-fallback
+          data-src-oro="{{ src_oro }}"
+          data-src-plata="{{ src_plata }}"
+          data-src-oro-rosa="{{ src_rosa }}"
+        >
+        <img class="mi-configurator__photo" alt="" width="1024" height="1024" hidden data-mi-configurator-photo>
+
+        <span class="mi-tag mi-label-sm mi-configurator__tag">
+          <span class="mi-configurator__tag-live">Vista 3D en vivo</span>
+          <span class="mi-configurator__tag-static">Vista previa</span>
+        </span>
+
+        <div class="mi-configurator__controls">
+          <button type="button" class="mi-configurator__control" aria-pressed="false" data-mi-configurator-rotate>
+            {% render 'mi-icon', name: 'rotate' %}
+            <span class="mi-visually-hidden">Girar sola</span>
+          </button>
+          <button type="button" class="mi-configurator__control mi-configurator__control--expand" data-mi-configurator-expand>
+            {% render 'mi-icon', name: 'expand' %}
+            <span class="mi-visually-hidden">Pantalla completa</span>
+          </button>
+        </div>
+
+        <p class="mi-configurator__hint mi-label" data-mi-configurator-hint>
+          {% render 'mi-icon', name: 'rotate-sm' %}
+          Arrastra para girar
+        </p>
+      </div>
+
+      <div class="mi-configurator__thumbs" role="group" aria-label="Vistas de la pieza">
+        <button type="button" class="mi-configurator__thumb" aria-pressed="true" data-mi-thumb="live">
+          {% render 'mi-image', fallback: 'mi-prod-oro.jpg', alt: 'Vista 3D', sizes: '(min-width: 750px) 192px, 25vw', class: 'mi-configurator__thumb-img', max_width: 400 %}
+          <span class="mi-visually-hidden">Vista 3D en vivo</span>
+        </button>
+        {%- for i in (1..3) -%}
+          {%- liquid
+            assign image_key = 'thumb_' | append: i
+            assign fallback_key = 'thumb_' | append: i | append: '_fallback'
+            assign alt_key = 'thumb_' | append: i | append: '_alt'
+            assign thumb_image = section.settings[image_key]
+            assign thumb_fallback = section.settings[fallback_key]
+            if thumb_image != blank
+              assign large = thumb_image | image_url: width: 1400
+            else
+              assign large = thumb_fallback | asset_img_url: '1400x'
+            endif
+          -%}
+          {%- if thumb_image != blank or thumb_fallback != blank -%}
+            <button type="button" class="mi-configurator__thumb" aria-pressed="false" data-mi-thumb="{{ large }}">
+              {% render 'mi-image', image: thumb_image, fallback: thumb_fallback, alt: section.settings[alt_key], sizes: '(min-width: 750px) 192px, 25vw', class: 'mi-configurator__thumb-img', max_width: 400 %}
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </mi-configurator>
+
+    <mi-configurator-form class="mi-configurator__info" data-product-title="{{ product.title | escape }}">
+      <div class="mi-configurator__head">
+        <p class="mi-label mi-ink-3">{{ section.settings.eyebrow }}</p>
+        <h1 class="mi-h1">{{ product.title }}</h1>
+        {%- if description != blank -%}
+          <p class="mi-body mi-ink-2 mi-configurator__description">{{ description }}</p>
+        {%- endif -%}
+        <p class="mi-title">{{ price }}</p>
+      </div>
+
+      {%- form 'product', product, class: 'mi-configurator__form', novalidate: 'novalidate' -%}
+        <input type="hidden" name="id" value="{{ variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+
+        <div class="mi-configurator__step mi-configurator__step--first">
+          <div class="mi-configurator__step-head mi-label">
+            <label for="MiText-{{ section.id }}">1 · Texto</label>
+            <span class="mi-ink-3" data-mi-text-count aria-live="polite">0 / {{ max_chars }}</span>
+          </div>
+          <input
+            type="text"
+            id="MiText-{{ section.id }}"
+            class="mi-configurator__text mi-serif"
+            name="properties[Texto]"
+            value="{{ section.settings.default_text | escape }}"
+            maxlength="{{ max_chars }}"
+            autocomplete="off"
+            spellcheck="false"
+            required
+            aria-describedby="MiTextHelp-{{ section.id }}"
+            data-mi-text
+          >
+          <p class="mi-body mi-ink-3" id="MiTextHelp-{{ section.id }}">
+            Iniciales, una fecha o un nombre corto. Hasta {{ max_chars }} caracteres.
+          </p>
+        </div>
+
+        <fieldset class="mi-configurator__step">
+          <legend class="mi-configurator__step-head mi-label">
+            <span>2 · Tipografía</span>
+            <span class="mi-ink-3" data-mi-current="font">Romana</span>
+          </legend>
+          <div class="mi-configurator__options mi-configurator__options--2">
+            {%- assign fonts = 'Romana,Cursiva' | split: ',' -%}
+            {%- for font in fonts -%}
+              <label class="mi-configurator__option">
+                <input
+                  type="radio"
+                  name="properties[Tipografía]"
+                  value="{{ font }}"
+                  data-mi-font="{{ font | handleize }}"
+                  {% if forloop.first %}
+                    checked
+                  {% endif %}
+                >
+                <span class="mi-serif mi-configurator__font-sample{% if font == 'Cursiva' %} is-cursiva{% endif %}" aria-hidden="true">M·I</span>
+                <span class="mi-label">{{ font }}</span>
+              </label>
+            {%- endfor -%}
+          </div>
+        </fieldset>
+
+        <fieldset class="mi-configurator__step" id="materiales">
+          <legend class="mi-configurator__step-head mi-label">
+            <span>3 · Material</span>
+            <span class="mi-ink-3" data-mi-current="material">Oro</span>
+          </legend>
+          <div class="mi-configurator__options mi-configurator__options--3">
+            {%- assign materials = 'Oro,Plata,Oro rosa' | split: ',' -%}
+            {%- for material in materials -%}
+              {%- assign material_key = material | handleize -%}
+              <label class="mi-configurator__option mi-configurator__option--metal">
+                <input
+                  type="radio"
+                  name="properties[Material]"
+                  value="{{ material }}"
+                  data-mi-material="{{ material_key }}"
+                  {% if forloop.first %}
+                    checked
+                  {% endif %}
+                >
+                <span class="mi-configurator__swatch" style="--swatch: var(--mi-metal-{{ material_key }});" aria-hidden="true"></span>
+                <span class="mi-label">{{ material }}</span>
+              </label>
+            {%- endfor -%}
+          </div>
+        </fieldset>
+
+        <div class="mi-configurator__step" data-mi-step="imagen">
+          <div class="mi-configurator__step-head mi-label">
+            <span>4 · Imagen propia (opcional)</span>
+            <span class="mi-tag mi-label-sm">Próximamente</span>
+          </div>
+          <div class="mi-configurator__upload mi-body mi-ink-3" aria-disabled="true">
+            {% render 'mi-icon', name: 'upload' %}
+            <span class="mi-configurator__upload-desktop">Sube un dibujo o una foto · PNG o JPG</span>
+            <span class="mi-configurator__upload-mobile">Sube un dibujo o una foto</span>
+          </div>
+          <p class="mi-body mi-ink-3">La convertimos a grabado en escala de grises y el taller la revisa contigo.</p>
+        </div>
+
+        <div class="mi-configurator__buy">
+          <p class="mi-body mi-ink-2" data-mi-summary aria-live="polite">
+            Tu pieza: {{ product.title }} · “{{ section.settings.default_text }}” · Romana · Oro
+          </p>
+          <button type="submit" name="add" class="mi-btn mi-btn--primary mi-btn--block" {% unless can_add %}disabled{% endunless %}>
+            {%- if can_add -%}
+              Agregar al carrito — {{ price }}
+            {%- else -%}
+              Agotado
+            {%- endif -%}
+          </button>
+          <p class="mi-body mi-configurator__error" role="alert" hidden data-mi-error></p>
+          <p class="mi-body mi-ink-3">
+            Se fabrica en {{ settings.mi_delivery_time | default: '[TIEMPO DE ENTREGA]' }}. Antes de producir, el taller revisa tu diseño contigo.
+          </p>
+        </div>
+      {%- endform -%}
+
+      <div class="mi-accordion mi-configurator__accordion">
+        {%- for i in (1..3) -%}
+          {%- liquid
+            assign title_key = 'accordion_' | append: i | append: '_title'
+            assign body_key = 'accordion_' | append: i | append: '_body'
+          -%}
+          {%- if section.settings[title_key] != blank -%}
+            <details class="mi-accordion__item">
+              <summary class="mi-accordion__summary mi-label">
+                {{ section.settings[title_key] }}
+                {% render 'mi-icon', name: 'plus' %}
+              </summary>
+              <div class="mi-accordion__content mi-body">{{ section.settings[body_key] }}</div>
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </mi-configurator-form>
+  </div>
+</section>
+
+{% render 'mi-configurator-scripts' %}
+
+{% stylesheet %}
+  .mi-configurator {
+    padding-inline: 0;
+  }
+
+  .mi-configurator__crumbs {
+    padding-inline: var(--mi-gutter);
+  }
+
+  .mi-configurator__crumb-product {
+    display: none;
+  }
+
+  .mi-configurator__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* ---- Viewer ---- */
+  .mi-configurator__viewer {
+    position: relative;
+    aspect-ratio: 1;
+    background: var(--mi-tile);
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  .mi-configurator__stage {
+    position: absolute;
+    inset: 0;
+  }
+
+  .mi-configurator__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .mi-configurator__canvas:active {
+    cursor: grabbing;
+  }
+
+  .is-3d-ready .mi-configurator__canvas {
+    opacity: 1;
+  }
+
+  .mi-configurator__fallback,
+  .mi-configurator__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.5s ease;
+  }
+
+  .is-3d-ready .mi-configurator__fallback {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mi-configurator__photo {
+    z-index: 2;
+  }
+
+  .mi-configurator__tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 3;
+  }
+
+  .mi-configurator__tag-static,
+  .is-static .mi-configurator__tag-live {
+    display: none;
+  }
+
+  .is-static .mi-configurator__tag-static {
+    display: inline;
+  }
+
+  .mi-configurator__controls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .is-3d-ready:not(.is-showing-photo) .mi-configurator__controls {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mi-configurator__control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--mi-white);
+    color: var(--mi-ink);
+    cursor: pointer;
+  }
+
+  .mi-configurator__control .mi-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .mi-configurator__control[aria-pressed='true'] {
+    background: var(--mi-ink);
+  }
+
+  .mi-configurator__control[aria-pressed='true'] svg path {
+    stroke: var(--mi-white);
+  }
+
+  .mi-configurator__control--expand {
+    display: none;
+  }
+
+  .mi-configurator__hint {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 14px;
+    border-radius: 100px;
+    background: var(--mi-white);
+    transform: translateX(-50%);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .mi-configurator__hint .mi-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .is-3d-ready:not(.is-showing-photo) .mi-configurator__hint:not(.is-hidden) {
+    opacity: 1;
+  }
+
+  .mi-configurator__viewer:fullscreen {
+    aspect-ratio: auto;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* ---- Thumbnails ---- */
+  .mi-configurator__thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px var(--mi-gutter) 0;
+  }
+
+  .mi-configurator__thumb {
+    position: relative;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 1px solid transparent;
+    background: var(--mi-tile);
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .mi-configurator__thumb[aria-pressed='true'] {
+    border-color: var(--mi-ink);
+  }
+
+  .mi-configurator__thumb-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---- Form ---- */
+  .mi-configurator__info {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px var(--mi-gutter) 0;
+  }
+
+  .mi-configurator__head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mi-configurator__head .mi-h1 {
+    font-size: 28px;
+    line-height: 38px;
+  }
+
+  .mi-configurator__form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .mi-configurator__step {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .mi-configurator__step > .mi-body {
+    margin: 0;
+  }
+
+  .mi-configurator__step--first {
+    padding-top: 24px;
+    border-top: 1px solid var(--mi-line);
+  }
+
+  .mi-configurator__step-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+    color: var(--mi-ink);
+  }
+
+  fieldset.mi-configurator__step > legend {
+    float: left;
+    margin-bottom: 10px;
+  }
+
+  fieldset.mi-configurator__step > legend + * {
+    clear: both;
+  }
+
+  input.mi-configurator__text {
+    width: 100%;
+    height: 56px;
+    box-sizing: border-box;
+    padding: 0 16px;
+    border: 1px solid var(--mi-ink);
+    border-radius: 0;
+    background: var(--mi-white);
+    color: var(--mi-ink);
+    appearance: none;
+  }
+
+  .mi-configurator__text.is-cursiva {
+    font-style: italic;
+  }
+
+  input.mi-configurator__text:focus-visible {
+    outline: 2px solid var(--mi-ink);
+    outline-offset: 2px;
+  }
+
+  .mi-configurator__options {
+    display: grid;
+    gap: 8px;
+  }
+
+  .mi-configurator__options--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mi-configurator__options--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mi-configurator__option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 56px;
+    padding: 0 14px;
+    border: 1px solid var(--mi-line);
+    background: var(--mi-white);
+    color: var(--mi-ink-3);
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .mi-configurator__option--metal {
+    justify-content: flex-start;
+    padding: 0 10px;
+  }
+
+  .mi-configurator__option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mi-configurator__option:has(input:checked) {
+    border-color: var(--mi-ink);
+    color: var(--mi-ink);
+  }
+
+  .mi-configurator__option:has(input:focus-visible) {
+    outline: 2px solid var(--mi-ink);
+    outline-offset: 2px;
+  }
+
+  .mi-configurator__option:hover {
+    border-color: var(--mi-ink-3);
+  }
+
+  .mi-configurator__font-sample {
+    color: var(--mi-ink);
+  }
+
+  .mi-configurator__font-sample.is-cursiva {
+    font-style: italic;
+  }
+
+  .mi-configurator__swatch {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--swatch);
+  }
+
+  .mi-configurator__upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 76px;
+    border: 1px dashed var(--mi-ink-3);
+    background: var(--mi-tile);
+    cursor: not-allowed;
+  }
+
+  .mi-configurator__upload-desktop {
+    display: none;
+  }
+
+  .mi-configurator__buy {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--mi-line);
+  }
+
+  .mi-configurator__buy p {
+    margin: 0;
+  }
+
+  .mi-configurator__error {
+    color: #a3341f;
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-configurator__crumb-product {
+      display: inline;
+    }
+
+    .mi-configurator__tag {
+      top: 20px;
+      left: 20px;
+    }
+
+    .mi-configurator__controls {
+      top: 20px;
+      right: 20px;
+    }
+
+    .mi-configurator__control {
+      width: 44px;
+      height: 44px;
+    }
+
+    .mi-configurator__control .mi-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .mi-configurator__control--expand {
+      display: inline-flex;
+    }
+
+    .mi-configurator__hint {
+      bottom: 24px;
+      padding: 10px 18px;
+    }
+
+    .mi-configurator__hint .mi-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .mi-configurator__upload-desktop {
+      display: inline;
+    }
+
+    .mi-configurator__upload-mobile {
+      display: none;
+    }
+
+    .mi-configurator__option {
+      height: 60px;
+      padding: 0 20px;
+    }
+
+    .mi-configurator__option--metal {
+      gap: 12px;
+      padding: 0 16px;
+    }
+
+    .mi-configurator__swatch {
+      width: 24px;
+      height: 24px;
+    }
+
+    .mi-configurator__options {
+      gap: 12px;
+    }
+
+    input.mi-configurator__text {
+      height: 60px;
+      padding: 0 20px;
+    }
+
+    .mi-configurator__upload {
+      height: 84px;
+      gap: 12px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .mi-configurator__layout {
+      grid-template-columns: minmax(0, 816fr) minmax(360px, 480fr);
+      gap: 48px;
+      padding-inline: var(--mi-gutter);
+      align-items: start;
+    }
+
+    .mi-configurator__gallery {
+      position: sticky;
+      top: calc(var(--mi-header-height) - 32px + 16px);
+    }
+
+    .mi-configurator__thumbs {
+      gap: 16px;
+      padding: 16px 0 0;
+    }
+
+    .mi-configurator__info {
+      gap: 28px;
+      padding: 0 0 0;
+    }
+
+    .mi-configurator__head {
+      gap: 10px;
+    }
+
+    .mi-configurator__head .mi-h1 {
+      font-size: 32px;
+      line-height: 42px;
+    }
+
+    .mi-configurator__form {
+      gap: 28px;
+    }
+
+    .mi-configurator__step--first,
+    .mi-configurator__buy {
+      padding-top: 28px;
+    }
+
+    .mi-configurator__buy {
+      gap: 14px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MI · Configurador 3D",
+  "tag": "section",
+  "class": "mi-configurator-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Antetítulo",
+      "default": "Joyería personalizada"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Descripción corta",
+      "info": "Si la dejas vacía se usa la descripción del producto.",
+      "default": "Una medalla lisa para lo que tú quieras decir. Escríbela, elige el metal y mírala girar antes de pedirla."
+    },
+    {
+      "type": "header",
+      "content": "Configurador"
+    },
+    {
+      "type": "text",
+      "id": "default_text",
+      "label": "Texto de ejemplo",
+      "default": "M·I"
+    },
+    {
+      "type": "range",
+      "id": "max_chars",
+      "label": "Máximo de caracteres",
+      "min": 4,
+      "max": 16,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "url",
+      "id": "model_url",
+      "label": "URL del modelo 3D (.glb)",
+      "info": "Opcional. Si Shopify no acepta el .glb en assets, súbelo a Contenido → Archivos y pega aquí su URL."
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "Foto mientras carga / sin 3D"
+    },
+    {
+      "type": "header",
+      "content": "Miniaturas"
+    },
+    { "type": "image_picker", "id": "thumb_1", "label": "Foto 1" },
+    { "type": "text", "id": "thumb_1_fallback", "label": "Foto 1 — archivo de muestra", "default": "mi-par-texto.jpg" },
+    { "type": "text", "id": "thumb_1_alt", "label": "Foto 1 — texto alternativo", "default": "Medalla con iniciales grabadas sobre piedra" },
+    { "type": "image_picker", "id": "thumb_2", "label": "Foto 2" },
+    { "type": "text", "id": "thumb_2_fallback", "label": "Foto 2 — archivo de muestra", "default": "mi-editorial.jpg" },
+    { "type": "text", "id": "thumb_2_alt", "label": "Foto 2 — texto alternativo", "default": "La medalla puesta" },
+    { "type": "image_picker", "id": "thumb_3", "label": "Foto 3" },
+    { "type": "text", "id": "thumb_3_fallback", "label": "Foto 3 — archivo de muestra", "default": "mi-tl-5.jpg" },
+    { "type": "text", "id": "thumb_3_alt", "label": "Foto 3 — texto alternativo", "default": "La medalla en su caja" },
+    {
+      "type": "header",
+      "content": "Acordeones"
+    },
+    { "type": "text", "id": "accordion_1_title", "label": "1 — Título", "default": "Detalles de la pieza" },
+    { "type": "richtext", "id": "accordion_1_body", "label": "1 — Texto", "default": "<p>Medalla de 18 mm de diámetro con cadena. Medidas y ley del metal por confirmar.</p>" },
+    { "type": "text", "id": "accordion_2_title", "label": "2 — Título", "default": "Envíos y entregas" },
+    { "type": "richtext", "id": "accordion_2_body", "label": "2 — Texto", "default": "<p>Cada pieza se fabrica a pedido. El tiempo de entrega se confirma al revisar tu diseño.</p>" },
+    { "type": "text", "id": "accordion_3_title", "label": "3 — Título", "default": "Cuidado de tu pieza" },
+    { "type": "richtext", "id": "accordion_3_body", "label": "3 — Texto", "default": "<p>Guárdala por separado y límpiala con un paño suave y seco. Evita perfumes y cloro.</p>" }
+  ],
+  "presets": [
+    {
+      "name": "MI · Configurador 3D"
+    }
+  ]
+}
+{% endschema %}

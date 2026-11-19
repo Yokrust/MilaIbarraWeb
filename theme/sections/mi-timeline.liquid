@@ -1,0 +1,238 @@
+{% comment %}
+  Línea de tiempo "Cómo nace tu pieza" (Figma 18:140 / mobile 23:129).
+  A horizontal track of events on a thin bar. While the section is on screen
+  the stage pins (position: sticky) and vertical scrolling moves the track
+  sideways and fills the progress bar — see assets/mi-timeline.js.
+  Without JS, or with prefers-reduced-motion, the track is a plain
+  horizontally scrollable row.
+
+  Events alternate: even ones have the text at the bottom of the photo,
+  odd ones at the top ("Timeline event / Texto abajo|arriba").
+{% endcomment %}
+
+<mi-timeline class="mi-timeline" id="como-funciona" data-testid="mi-timeline-{{ section.id }}">
+  <div class="mi-timeline__scroller" data-mi-timeline-scroller>
+    <div class="mi-timeline__sticky" data-mi-timeline-sticky>
+      <div class="mi-timeline__viewport" data-mi-timeline-viewport>
+        <ol class="mi-timeline__track" role="list" data-mi-timeline-track>
+          <li class="mi-timeline__bar" aria-hidden="true">
+            <span class="mi-timeline__progress" data-mi-timeline-progress></span>
+          </li>
+          {%- for block in section.blocks -%}
+            <li
+              class="mi-timeline__event{% cycle ' mi-timeline__event--text-bottom', ' mi-timeline__event--text-top' %}"
+              {{ block.shopify_attributes }}
+            >
+              <div class="mi-timeline__head">
+                <span class="mi-timeline__dot" aria-hidden="true"></span>
+                <h3 class="mi-h3">{{ block.settings.title }}</h3>
+              </div>
+              <div class="mi-timeline__content">
+                <div class="mi-timeline__img mi-media">
+                  {% render 'mi-image',
+                    image: block.settings.image,
+                    fallback: block.settings.fallback,
+                    alt: block.settings.title,
+                    sizes: '302px',
+                    max_width: 800
+                  %}
+                </div>
+                <p class="mi-body-lg mi-timeline__text">{{ block.settings.text }}</p>
+              </div>
+            </li>
+          {%- endfor -%}
+        </ol>
+      </div>
+    </div>
+  </div>
+</mi-timeline>
+
+<script src="{{ 'mi-timeline.js' | asset_url }}" type="module" defer></script>
+
+{% stylesheet %}
+  .mi-timeline {
+    display: block;
+    --mi-tl-start: 16px;
+    --mi-tl-stride: 580px;
+    --mi-tl-event: 532px;
+    padding-block: 64px;
+    color: var(--mi-ink);
+  }
+
+  .mi-timeline__viewport {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mi-timeline__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mi-timeline__track {
+    position: relative;
+    display: flex;
+    gap: calc(var(--mi-tl-stride) - var(--mi-tl-event));
+    width: max-content;
+    height: 480px;
+    margin: 0;
+    padding: 0 var(--mi-tl-start);
+    list-style: none;
+    will-change: transform;
+  }
+
+  .mi-timeline__bar {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--mi-line);
+  }
+
+  .mi-timeline__progress {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(var(--mi-tl-start) + 12px);
+    background: var(--mi-ink);
+  }
+
+  .mi-timeline__event {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    width: var(--mi-tl-event);
+    flex: none;
+  }
+
+  .mi-timeline__head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mi-timeline__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--mi-ink);
+  }
+
+  .mi-timeline__content {
+    display: flex;
+    gap: 46px;
+  }
+
+  .mi-timeline__event--text-bottom .mi-timeline__content {
+    align-items: flex-end;
+  }
+
+  .mi-timeline__event--text-top .mi-timeline__content {
+    align-items: flex-start;
+  }
+
+  .mi-timeline__img {
+    flex: none;
+    width: 302px;
+    height: 377px;
+  }
+
+  .mi-timeline__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mi-timeline__text {
+    width: 184px;
+    margin: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-timeline {
+      --mi-tl-start: 48px;
+      --mi-tl-stride: 696px;
+      padding-block: 96px;
+    }
+  }
+
+  /* Pinned mode (set by mi-timeline.js): the stage sticks and the track is
+     translated by scroll progress instead of scrolled. */
+  .mi-timeline.is-pinned {
+    padding-block: 0;
+  }
+
+  .mi-timeline.is-pinned .mi-timeline__sticky {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .mi-timeline.is-pinned .mi-timeline__viewport {
+    width: 100%;
+    overflow: visible;
+    padding-top: var(--mi-tl-offset, 60px);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MI · Línea de tiempo",
+  "tag": "section",
+  "class": "mi-timeline-section",
+  "max_blocks": 8,
+  "blocks": [
+    {
+      "type": "event",
+      "name": "Momento",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título",
+          "default": "Cómo nace tu pieza"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Texto",
+          "default": "Del texto que escribes a la pieza que llevas puesta. Nada se produce sin que lo hayas visto antes."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Foto"
+        },
+        {
+          "type": "select",
+          "id": "fallback",
+          "label": "Foto de muestra",
+          "options": [
+            { "value": "mi-tl-0.jpg", "label": "Cuaderno de bocetos" },
+            { "value": "mi-tl-1.jpg", "label": "Escribiendo iniciales" },
+            { "value": "mi-tl-2.jpg", "label": "Vista 3D en el celular" },
+            { "value": "mi-tl-3.jpg", "label": "Revisión con lupa" },
+            { "value": "mi-tl-4.jpg", "label": "Banco del taller" },
+            { "value": "mi-tl-5.jpg", "label": "Estuche de entrega" }
+          ],
+          "default": "mi-tl-0.jpg"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "MI · Línea de tiempo",
+      "blocks": [
+        { "type": "event" },
+        { "type": "event", "settings": { "title": "Escríbela", "text": "Iniciales, una fecha, un nombre corto o una imagen tuya.", "fallback": "mi-tl-1.jpg" } },
+        { "type": "event", "settings": { "title": "Mírala en 3D", "text": "La vista previa gira con tus cambios: texto, tipografía y material.", "fallback": "mi-tl-2.jpg" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

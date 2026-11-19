@@ -1,0 +1,609 @@
+{% comment %}
+  Standard product (Figma: "Producto estándar — Laptop 1440" 22:427 and
+  "Producto estándar — Móvil 390" 25:325). The default product template for
+  the future catalogue; only linked when "Mostrar tienda" is on (noindex until
+  then, see snippets/mi-head.liquid). The configurable "joyería personalizada"
+  piece uses its own template (product.joyeria-personalizada.json).
+
+  2×2 photo grid on desktop, swipe gallery with a "1 / 4" counter on mobile.
+  Variant options render as Figma pickers: an option named Material/Metal
+  gets metal swatches, everything else (Talla…) gets square buttons. Pieces
+  tagged "a-la-medida" show the "A la medida" tile linking to the configurator.
+  Add to cart posts to /cart/add.js and opens the drawer (mi:cart:refresh).
+{% endcomment %}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign media_count = product.media.size
+  assign category = product.collections.first.title
+  assign eyebrow = category
+  if product.type != blank
+    if eyebrow != blank
+      assign eyebrow = eyebrow | append: ' · ' | append: product.type
+    else
+      assign eyebrow = product.type
+    endif
+  endif
+  assign is_custom = false
+  if product.tags contains 'a-la-medida'
+    assign is_custom = true
+  endif
+  assign delivery_time = settings.mi_delivery_time
+-%}
+
+<section class="mi-product" data-testid="mi-product-{{ section.id }}">
+  <nav class="mi-breadcrumbs mi-body mi-product__crumbs" aria-label="Migas de pan">
+    <a href="{{ routes.root_url }}">Inicio</a>
+    <span aria-hidden="true">/</span>
+    {%- if collection -%}
+      <a href="{{ collection.url }}">{{ collection.title }}</a>
+      <span aria-hidden="true">/</span>
+    {%- elsif product.collections.first -%}
+      <a href="{{ product.collections.first.url }}">{{ product.collections.first.title }}</a>
+      <span aria-hidden="true">/</span>
+    {%- endif -%}
+    <span aria-current="page">{{ product.title }}</span>
+  </nav>
+
+  <div class="mi-product__layout">
+    <div class="mi-product__gallery">
+      <ul class="mi-product__media" role="list" data-mi-gallery aria-label="Fotos de {{ product.title | escape }}">
+        {%- for media in product.media limit: 4 -%}
+          <li class="mi-product__slide">
+            {%- assign media_eager = false -%}
+            {%- if forloop.first -%}
+              {%- assign media_eager = true -%}
+            {%- endif -%}
+            {% render 'mi-image',
+              image: media.preview_image,
+              alt: media.alt,
+              sizes: '(min-width: 750px) 28vw, 100vw',
+              class: 'mi-product__img',
+              eager: media_eager
+            %}
+          </li>
+        {%- else -%}
+          {%- assign fallbacks = 'mi-col-anillo.jpg,mi-editorial.jpg,mi-par-texto.jpg,mi-tl-5.jpg' | split: ',' -%}
+          {%- for fallback in fallbacks -%}
+            <li class="mi-product__slide">
+              {% render 'mi-image',
+                fallback: fallback,
+                alt: product.title,
+                sizes: '(min-width: 750px) 28vw, 100vw',
+                class: 'mi-product__img',
+                eager: forloop.first
+              %}
+            </li>
+          {%- endfor -%}
+          {%- assign media_count = 4 -%}
+        {%- endfor -%}
+      </ul>
+      {%- if media_count > 1 -%}
+        <p class="mi-product__counter mi-label" aria-hidden="true">
+          <span data-mi-gallery-index>1</span> / {{ media_count | at_most: 4 }}
+        </p>
+      {%- endif -%}
+    </div>
+
+    <div class="mi-product__info">
+      <div class="mi-product__head">
+        {%- if eyebrow != blank -%}
+          <p class="mi-label mi-ink-3">{{ eyebrow }}</p>
+        {%- endif -%}
+        <h1 class="mi-h1">{{ product.title }}</h1>
+        {%- if section.settings.show_summary and product.description != blank -%}
+          <p class="mi-body mi-ink-2">{{ product.description | strip_html | truncatewords: 24 }}</p>
+        {%- endif -%}
+        <p class="mi-title" data-mi-price>{{ current_variant.price | money_with_currency }}</p>
+      </div>
+
+      {%- form 'product', product, class: 'mi-product__form', data-mi-product-form: '', novalidate: 'novalidate' -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}" data-mi-variant-id>
+
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            {%- assign option_handle = option.name | handleize -%}
+            {%- assign is_metal = false -%}
+            {%- if option_handle == 'material' or option_handle == 'metal' -%}
+              {%- assign is_metal = true -%}
+            {%- endif -%}
+            <fieldset class="mi-product__option{% if forloop.first %} mi-product__option--first{% endif %}" data-mi-option="{{ forloop.index0 }}">
+              <legend class="mi-product__option-head mi-label">
+                <span>{{ option.name }}</span>
+                {%- if option_handle == 'talla' and section.settings.size_guide_url != blank -%}
+                  <a href="{{ section.settings.size_guide_url }}" class="mi-link mi-ink-3">Guía de tallas</a>
+                {%- else -%}
+                  <span class="mi-ink-3" data-mi-option-value>{{ option.selected_value }}</span>
+                {%- endif -%}
+              </legend>
+              <div class="mi-product__choices{% if is_metal %} mi-product__choices--metal{% else %} mi-product__choices--size{% endif %}">
+                {%- for value in option.values -%}
+                  {%- assign value_handle = value | handleize -%}
+                  <label class="mi-product__choice{% if value.available == false %} is-unavailable{% endif %}">
+                    <input
+                      type="radio"
+                      class="mi-visually-hidden"
+                      name="{{ option.name | escape }}"
+                      value="{{ value | escape }}"
+                      {% if option.selected_value == value %}
+                        checked
+                      {% endif %}
+                    >
+                    {%- if is_metal -%}
+                      <span class="mi-product__swatch mi-product__swatch--{{ value_handle }}" aria-hidden="true"></span>
+                    {%- endif -%}
+                    <span class="mi-label">{{ value }}</span>
+                  </label>
+                {%- endfor -%}
+              </div>
+            </fieldset>
+          {%- endfor -%}
+        {%- endunless -%}
+
+        {%- if is_custom and section.settings.configurator_product != blank -%}
+          <a href="{{ section.settings.configurator_product.url }}" class="mi-product__custom">
+            <span class="mi-product__custom-text">
+              <span class="mi-label">A la medida</span>
+              <span class="mi-body mi-ink-2">{{ section.settings.custom_text }}</span>
+            </span>
+            <span class="mi-label">Personalizar</span>
+          </a>
+        {%- endif -%}
+
+        <div class="mi-product__buy">
+          <button
+            type="submit"
+            name="add"
+            class="mi-btn mi-btn--primary mi-btn--block"
+            data-mi-add
+            {% unless current_variant.available %}
+              disabled
+            {% endunless %}
+          >
+            {%- if current_variant.available -%}
+              Agregar al carrito — {{ current_variant.price | money_with_currency }}
+            {%- else -%}
+              Agotado
+            {%- endif -%}
+          </button>
+          {%- if delivery_time != blank -%}
+            <p class="mi-body mi-ink-3">Entrega en {{ delivery_time }}.</p>
+          {%- endif -%}
+          <p class="mi-body mi-product__error" role="alert" data-mi-error hidden></p>
+        </div>
+      {%- endform -%}
+
+      <div class="mi-accordion mi-product__accordion">
+        {%- if product.description != blank -%}
+          <details class="mi-accordion__item">
+            <summary class="mi-accordion__summary mi-label">
+              Detalles de la pieza
+              {% render 'mi-icon', name: 'plus' %}
+            </summary>
+            <div class="mi-accordion__content mi-body">{{ product.description }}</div>
+          </details>
+        {%- endif -%}
+        {%- if section.settings.shipping_text != blank -%}
+          <details class="mi-accordion__item">
+            <summary class="mi-accordion__summary mi-label">
+              Envíos y entregas
+              {% render 'mi-icon', name: 'plus' %}
+            </summary>
+            <div class="mi-accordion__content mi-body">{{ section.settings.shipping_text }}</div>
+          </details>
+        {%- endif -%}
+        {%- if section.settings.care_text != blank -%}
+          <details class="mi-accordion__item">
+            <summary class="mi-accordion__summary mi-label">
+              Cuidado de tu pieza
+              {% render 'mi-icon', name: 'plus' %}
+            </summary>
+            <div class="mi-accordion__content mi-body">{{ section.settings.care_text }}</div>
+          </details>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="mi-product__recs"
+    data-mi-recommendations
+    data-url="{{ routes.product_recommendations_url }}?product_id={{ product.id }}&limit=4&section_id={{ section.id }}"
+  >
+    {%- if recommendations.performed and recommendations.products_count > 0 -%}
+      <h2 class="mi-h2 mi-product__recs-title">{{ section.settings.recommendations_heading }}</h2>
+      <div class="mi-product__recs-row">
+        {%- for rec in recommendations.products -%}
+          {% render 'mi-product-card', product: rec %}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  <script type="application/json" data-mi-variants>
+    {{ product.variants | json }}
+  </script>
+</section>
+
+<script src="{{ 'mi-product.js' | asset_url }}" type="module" defer></script>
+
+{% stylesheet %}
+  .mi-product {
+    max-width: var(--mi-max-width);
+    margin-inline: auto;
+  }
+
+  .mi-product__crumbs {
+    padding-inline: var(--mi-gutter);
+  }
+
+  .mi-product__layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Gallery */
+  .mi-product__gallery {
+    position: relative;
+  }
+
+  .mi-product__media {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .mi-product__media::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mi-product__slide {
+    flex: 0 0 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--mi-tile);
+    scroll-snap-align: start;
+  }
+
+  .mi-product__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mi-product__counter {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    margin: 0;
+    padding: 6px 12px;
+    background: var(--mi-white);
+    border-radius: 100px;
+    transform: translateX(-50%);
+  }
+
+  /* Info */
+  .mi-product__info {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px var(--mi-gutter) 0;
+  }
+
+  .mi-product__head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mi-product__head p,
+  .mi-product__head h1 {
+    margin: 0;
+  }
+
+  .mi-product__head .mi-h1 {
+    font-size: 28px;
+    line-height: 38px;
+  }
+
+  .mi-product__form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .mi-product__option {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .mi-product__option--first {
+    padding-top: 24px;
+    border-top: 1px solid var(--mi-line);
+  }
+
+  .mi-product__option-head {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 10px;
+  }
+
+  .mi-product__choices {
+    display: grid;
+    gap: 8px;
+  }
+
+  .mi-product__choices--metal {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mi-product__choices--size {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .mi-product__choice {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 10px;
+    border: 1px solid var(--mi-line);
+    background: var(--mi-white);
+    color: var(--mi-ink-3);
+    cursor: pointer;
+  }
+
+  .mi-product__choices--metal .mi-product__choice {
+    justify-content: flex-start;
+    height: 56px;
+  }
+
+  .mi-product__choice:has(input:checked) {
+    border-color: var(--mi-ink);
+    color: var(--mi-ink);
+  }
+
+  .mi-product__choice:has(input:focus-visible) {
+    outline: 2px solid var(--mi-ink);
+    outline-offset: 2px;
+  }
+
+  .mi-product__choice.is-unavailable {
+    color: var(--mi-line);
+    text-decoration: line-through;
+  }
+
+  .mi-product__swatch {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--mi-metal-oro);
+  }
+
+  .mi-product__swatch--plata {
+    background: var(--mi-metal-plata);
+  }
+
+  .mi-product__swatch--oro-rosa {
+    background: var(--mi-metal-oro-rosa);
+  }
+
+  .mi-product__custom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    background: var(--mi-tile);
+    color: var(--mi-ink);
+    text-decoration: none;
+  }
+
+  .mi-product__custom:hover .mi-label:last-child {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .mi-product__custom-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mi-product__buy {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mi-product__buy p {
+    margin: 0;
+  }
+
+  .mi-product__error {
+    color: #b3261e;
+  }
+
+  /* Recommendations */
+  .mi-product__recs {
+    padding: 48px var(--mi-gutter) 56px;
+  }
+
+  .mi-product__recs:empty {
+    display: none;
+  }
+
+  .mi-product__recs-title {
+    margin: 0 0 24px;
+  }
+
+  .mi-product__recs-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 8px) / 2.05);
+    gap: 8px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .mi-product__recs-row > * {
+    scroll-snap-align: start;
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-product__layout {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 48px;
+      padding-inline: var(--mi-gutter);
+    }
+
+    .mi-product__gallery {
+      flex: 0 1 816px;
+    }
+
+    .mi-product__media {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      overflow: visible;
+    }
+
+    .mi-product__counter {
+      display: none;
+    }
+
+    .mi-product__info {
+      position: sticky;
+      top: calc(var(--mi-header-height) - 8px);
+      flex: 0 1 480px;
+      gap: 28px;
+      padding: 0;
+    }
+
+    .mi-product__head {
+      gap: 10px;
+    }
+
+    .mi-product__head .mi-h1 {
+      font-size: 32px;
+      line-height: 42px;
+    }
+
+    .mi-product__form {
+      gap: 28px;
+    }
+
+    .mi-product__option--first {
+      padding-top: 28px;
+    }
+
+    .mi-product__choices {
+      gap: 12px;
+    }
+
+    .mi-product__choice {
+      height: 52px;
+    }
+
+    .mi-product__choices--metal .mi-product__choice {
+      height: 60px;
+      padding: 0 16px;
+      gap: 12px;
+    }
+
+    .mi-product__swatch {
+      flex-basis: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .mi-product__custom {
+      padding: 16px 20px;
+    }
+
+    .mi-product__recs {
+      margin-top: 96px;
+      padding: 72px var(--mi-gutter) 96px;
+      border-top: 1px solid var(--mi-line);
+    }
+
+    .mi-product__recs-title {
+      margin-bottom: 40px;
+    }
+
+    .mi-product__recs-row {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 48px;
+      overflow: visible;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Mila Ibarra · Producto",
+  "tag": "div",
+  "class": "mi-product-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Plantilla de producto estándar. Las piezas con la etiqueta \"a-la-medida\" muestran el acceso al configurador."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_summary",
+      "label": "Mostrar resumen de la descripción bajo el título",
+      "default": true
+    },
+    {
+      "type": "product",
+      "id": "configurator_product",
+      "label": "Producto de joyería personalizada (configurador)"
+    },
+    {
+      "type": "text",
+      "id": "custom_text",
+      "label": "Texto del acceso \"A la medida\"",
+      "default": "Graba tus iniciales y míralas en 3D."
+    },
+    {
+      "type": "url",
+      "id": "size_guide_url",
+      "label": "Enlace de la guía de tallas"
+    },
+    {
+      "type": "richtext",
+      "id": "shipping_text",
+      "label": "Envíos y entregas",
+      "default": "<p>Enviamos a todo México. El tiempo de entrega se confirma al pagar.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "care_text",
+      "label": "Cuidado de tu pieza",
+      "default": "<p>Guárdala en su estuche, lejos de perfumes y cremas. Límpiala con un paño suave y seco.</p>"
+    },
+    {
+      "type": "text",
+      "id": "recommendations_heading",
+      "label": "Título de recomendaciones",
+      "default": "También te puede gustar"
+    }
+  ]
+}
+{% endschema %}

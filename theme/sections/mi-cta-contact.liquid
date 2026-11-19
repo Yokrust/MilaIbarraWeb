@@ -1,0 +1,152 @@
+{% comment %}
+  Contacto (Home) — Figma 18:186 / mobile 23:175. Light-grey band with
+  label, H2, line of copy and two buttons: WhatsApp Business (number from
+  Ajustes del tema → Mila Ibarra — Contacto) and the contact form page.
+{% endcomment %}
+
+{%- liquid
+  assign whatsapp_digits = settings.mi_whatsapp_number | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')'
+  assign whatsapp_url = 'https://wa.me/' | append: whatsapp_digits
+  if whatsapp_digits == blank
+    assign whatsapp_url = section.settings.contact_page.url | default: '/pages/contacto'
+  endif
+  assign form_url = section.settings.contact_page.url | default: '/pages/contacto'
+-%}
+
+<div class="mi-cta-contact" data-testid="mi-cta-contact-{{ section.id }}">
+  <div class="mi-cta-contact__inner" data-mi-reveal>
+    {%- if section.settings.label != blank -%}
+      <p class="mi-label mi-ink-3">{{ section.settings.label }}</p>
+    {%- endif -%}
+    {%- if section.settings.heading != blank -%}
+      <h2 class="mi-h2 mi-cta-contact__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    {%- if section.settings.text != blank -%}
+      <p class="mi-body mi-cta-contact__text">{{ section.settings.text }}</p>
+    {%- endif -%}
+    <div class="mi-cta-contact__buttons">
+      {%- if section.settings.whatsapp_label != blank -%}
+        <a
+          href="{{ whatsapp_url }}"
+          class="mi-btn mi-btn--primary"
+          {% if whatsapp_digits != blank %}
+            target="_blank" rel="noopener"
+          {% endif %}
+        >
+          {{- section.settings.whatsapp_label -}}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.form_label != blank -%}
+        <a href="{{ form_url }}" class="mi-btn mi-btn--secondary">{{ section.settings.form_label }}</a>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .mi-cta-contact {
+    background: var(--mi-tile);
+    padding: 64px 24px;
+    color: var(--mi-ink);
+  }
+
+  .mi-cta-contact__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .mi-cta-contact__heading {
+    max-width: 322px;
+  }
+
+  .mi-cta-contact__text {
+    max-width: 322px;
+  }
+
+  .mi-cta-contact__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding-top: 12px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .mi-cta-contact {
+      padding-block: 96px;
+    }
+
+    .mi-cta-contact__inner {
+      gap: 20px;
+    }
+
+    .mi-cta-contact__heading {
+      max-width: 640px;
+    }
+
+    .mi-cta-contact__text {
+      max-width: 420px;
+    }
+
+    .mi-cta-contact__buttons {
+      flex-direction: row;
+      justify-content: center;
+      gap: 12px;
+      width: auto;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MI · Llamado a contacto",
+  "tag": "section",
+  "class": "mi-cta-contact-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Etiqueta",
+      "default": "Contacto"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "¿Tienes una idea? Hablemos."
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Texto",
+      "default": "Si lo que quieres grabar no cabe en el configurador, escríbenos y lo resolvemos contigo."
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_label",
+      "label": "Botón de WhatsApp",
+      "info": "El número se toma de Ajustes del tema → Mila Ibarra — Contacto.",
+      "default": "WhatsApp Business"
+    },
+    {
+      "type": "text",
+      "id": "form_label",
+      "label": "Botón del formulario",
+      "default": "Formulario de contacto"
+    },
+    {
+      "type": "page",
+      "id": "contact_page",
+      "label": "Página de contacto"
+    }
+  ],
+  "presets": [
+    {
+      "name": "MI · Llamado a contacto"
+    }
+  ]
+}
+{% endschema %}

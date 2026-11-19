@@ -1,0 +1,492 @@
+/*
+ * Mila Ibarra — design tokens and shared primitives (v2).
+ * Figma: "Mila Ibarra — Diseño" (IksrwTTHwcnyoSoOTqlLm0), page "01 · Sistema",
+ * variable collection "MI v2" + text styles "v2/*".
+ *
+ * Loads after Horizon's theme-styles-variables / color-palette, so the font
+ * overrides below win the cascade and Horizon's own templates (cart page,
+ * search, 404, account) pick up the same typography.
+ *
+ * @font-face rules live in snippets/mi-head.liquid (they need asset_url).
+ */
+
+:root {
+  /* Color — "mi/*" variables */
+  --mi-white: #ffffff;
+  --mi-black: #000000;
+  --mi-ink: #111111;
+  --mi-ink-2: #444444;
+  --mi-ink-3: #6b6b6b;
+  --mi-line: #e4e2dc;
+  --mi-tile: #f5f4f1;
+  --mi-scrim: rgb(0 0 0 / 0.4);
+
+  /* Metal swatches (configurator + product material picker) */
+  --mi-metal-oro: #c9a050;
+  --mi-metal-plata: #c4c4c2;
+  --mi-metal-oro-rosa: #d39a83;
+
+  /* Typefaces */
+  --mi-font-sans: 'Host Grotesk', ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --mi-font-serif: 'Ibarra Real Nova', 'Iowan Old Style', Georgia, serif;
+
+  /* Layout */
+  --mi-gutter: 16px;
+  --mi-section-space: 64px;
+  --mi-max-width: 1440px;
+  --mi-header-height: 90px;
+
+  /* Horizon overrides: its sections read these */
+  --font-body--family: var(--mi-font-sans);
+  --font-body--weight: 400;
+  --font-subheading--family: var(--mi-font-sans);
+  --font-subheading--weight: 500;
+  --font-heading--family: var(--mi-font-sans);
+  --font-heading--weight: 500;
+  --font-accent--family: var(--mi-font-serif);
+  --font-accent--weight: 400;
+}
+
+@media screen and (min-width: 750px) {
+  :root {
+    --mi-gutter: 48px;
+    --mi-section-space: 96px;
+    --mi-header-height: 120px;
+  }
+}
+
+body {
+  background: var(--mi-white);
+  color: var(--mi-ink);
+  font-family: var(--mi-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Text styles ("v2/*") ---------- */
+
+.mi-label,
+.mi-label-sm,
+.mi-body,
+.mi-body-lg,
+.mi-title,
+.mi-h1,
+.mi-h2,
+.mi-h3 {
+  font-family: var(--mi-font-sans);
+  margin: 0;
+}
+
+.mi-label {
+  font-size: 11px;
+  line-height: 16.5px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.mi-label-sm {
+  font-size: 9px;
+  line-height: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.mi-body {
+  font-size: 13px;
+  line-height: 19.5px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.mi-body-lg {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.mi-title {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.mi-h1 {
+  font-size: 32px;
+  line-height: 42px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.mi-h2 {
+  font-size: 28px;
+  line-height: 38px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.mi-h3 {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.mi-quote,
+.mi-quote-sm,
+.mi-serif,
+.mi-wordmark {
+  font-family: var(--mi-font-serif);
+  font-weight: 400;
+  margin: 0;
+}
+
+.mi-quote {
+  font-size: 32px;
+  line-height: 42px;
+  font-style: italic;
+}
+
+.mi-quote-sm {
+  font-size: 22px;
+  line-height: 30px;
+  font-style: italic;
+}
+
+.mi-serif {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+.mi-wordmark {
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 749px) {
+  .mi-quote {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .mi-wordmark {
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 4.4px;
+  }
+}
+
+.mi-ink-2 {
+  color: var(--mi-ink-2);
+}
+
+.mi-ink-3 {
+  color: var(--mi-ink-3);
+}
+
+.mi-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Layout ---------- */
+
+.mi-container {
+  width: 100%;
+  max-width: var(--mi-max-width);
+  margin-inline: auto;
+  padding-inline: var(--mi-gutter);
+  box-sizing: border-box;
+}
+
+/* ---------- Buttons ("Button / *") ---------- */
+
+.mi-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 32px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  font-family: var(--mi-font-sans);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.mi-btn:focus-visible {
+  outline: 2px solid var(--mi-ink);
+  outline-offset: 3px;
+}
+
+.mi-btn--primary {
+  background: var(--mi-ink);
+  color: var(--mi-white);
+}
+
+.mi-btn--primary:hover {
+  background: #333;
+}
+
+.mi-btn--secondary {
+  background: var(--mi-white);
+  color: var(--mi-ink);
+  border-color: var(--mi-ink);
+}
+
+.mi-btn--secondary:hover {
+  background: var(--mi-ink);
+  color: var(--mi-white);
+}
+
+.mi-btn--on-image {
+  height: 40px;
+  padding: 0 24px;
+  background: var(--mi-white);
+  color: var(--mi-ink);
+}
+
+.mi-btn--on-image:hover {
+  background: var(--mi-tile);
+}
+
+.mi-btn--block {
+  width: 100%;
+}
+
+.mi-btn[disabled],
+.mi-btn[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Text link styled as a label ("Quitar", "Seguir comprando", "Personalizar") */
+.mi-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mi-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Tag ---------- */
+
+.mi-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--mi-white);
+  color: var(--mi-ink);
+}
+
+/* ---------- Icons ---------- */
+
+.mi-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.mi-icon svg {
+  display: block;
+}
+
+/* ---------- Form field ("Field") ---------- */
+
+.mi-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.mi-field__label {
+  color: var(--mi-ink-3);
+}
+
+/* element + class beats Horizon's base.css `input:not(...)` rule */
+input.mi-field__input,
+textarea.mi-field__input,
+select.mi-field__input {
+  width: 100%;
+  height: 52px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  background: var(--mi-white);
+  border: 1px solid var(--mi-line);
+  border-radius: 0;
+  color: var(--mi-ink);
+  font-family: var(--mi-font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.2px;
+  appearance: none;
+}
+
+textarea.mi-field__input {
+  height: 148px;
+  padding: 16px;
+  resize: vertical;
+}
+
+input.mi-field__input::placeholder,
+textarea.mi-field__input::placeholder {
+  color: var(--mi-ink-3);
+  opacity: 1;
+}
+
+input.mi-field__input:focus,
+textarea.mi-field__input:focus,
+select.mi-field__input:focus {
+  outline: none;
+  border-color: var(--mi-ink);
+}
+
+/* ---------- Accordion row ---------- */
+
+.mi-accordion {
+  border-top: 1px solid var(--mi-line);
+}
+
+.mi-accordion__item {
+  border-bottom: 1px solid var(--mi-line);
+}
+
+.mi-accordion__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.mi-accordion__summary::-webkit-details-marker {
+  display: none;
+}
+
+.mi-accordion__summary .mi-icon {
+  transition: transform 0.2s ease;
+}
+
+.mi-accordion__item[open] .mi-accordion__summary .mi-icon {
+  transform: rotate(45deg);
+}
+
+.mi-accordion__content {
+  padding: 0 0 20px;
+  color: var(--mi-ink-2);
+}
+
+.mi-accordion__content > * {
+  margin: 0 0 8px;
+}
+
+/* ---------- Media ---------- */
+
+.mi-media {
+  position: relative;
+  overflow: hidden;
+  background: var(--mi-tile);
+}
+
+.mi-media > img,
+.mi-media > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Bottom shadow used on hero, banner and editorial tiles ("Sombra") */
+.mi-shade {
+  position: absolute;
+  inset: auto 0 0;
+  height: 53%;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.55));
+  pointer-events: none;
+}
+
+/* ---------- Breadcrumbs ("Migas") ---------- */
+
+.mi-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding-block: 12px;
+  color: var(--mi-ink-2);
+}
+
+@media screen and (min-width: 750px) {
+  .mi-breadcrumbs {
+    padding-block: 20px;
+  }
+}
+
+.mi-breadcrumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mi-breadcrumbs a:hover {
+  color: var(--mi-ink);
+}
+
+/* ---------- Scroll reveal (IntersectionObserver in mi-reveal.js) ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .mi-js [data-mi-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .mi-js [data-mi-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Document scrolling ----------
+ * Horizon makes .page-wrapper the scroll container from 990px up. The campaign
+ * pages need the window to scroll at every width: the sticky header, the
+ * pinned timeline and scroll reveals all observe the viewport. */
+@media (min-width: 990px) {
+  html:has(.page-wrapper),
+  html:has(.page-wrapper) body {
+    height: auto;
+    overflow: visible;
+  }
+
+  .page-wrapper {
+    height: auto;
+    overflow: visible;
+  }
+}

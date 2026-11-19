@@ -1,0 +1,101 @@
+{
+  "sections": {
+    "mi_configurator": {
+      "type": "mi-configurator",
+      "settings": {}
+    },
+    "mi_steps": {
+      "type": "mi-steps",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "Lo que ves es lo que se graba",
+            "text": "Cada cambio de texto, tipografía o material se refleja al instante en la pieza."
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "El taller lo revisa contigo",
+            "text": "Antes de producir revisamos tu texto o tu imagen para que quede como la imaginaste."
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "Llega al pedido tal cual",
+            "text": "Tu texto, tu tipografía y tu material viajan con el pedido: el taller recibe exactamente lo que aprobaste."
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3"
+      ]
+    },
+    "mi_other_metals": {
+      "type": "mi-product-row",
+      "settings": {
+        "heading": "La misma pieza, en otro metal",
+        "count_label": "4 versiones",
+        "padding_top": 96,
+        "padding_bottom": 96
+      },
+      "blocks": {
+        "oro": {
+          "type": "card",
+          "settings": {
+            "fallback": "mi-prod-oro.jpg",
+            "title": "Medalla Firma, oro, iniciales grabadas",
+            "price": "$0,000 MXN",
+            "tag": "A la medida",
+            "link": "/products/medalla-firma?material=oro"
+          }
+        },
+        "plata": {
+          "type": "card",
+          "settings": {
+            "fallback": "mi-prod-plata.jpg",
+            "title": "Medalla Firma, plata, iniciales grabadas",
+            "price": "$0,000 MXN",
+            "tag": "A la medida",
+            "link": "/products/medalla-firma?material=plata"
+          }
+        },
+        "rosa": {
+          "type": "card",
+          "settings": {
+            "fallback": "mi-prod-rosa.jpg",
+            "title": "Medalla Firma, oro rosa, iniciales grabadas",
+            "price": "$0,000 MXN",
+            "tag": "A la medida",
+            "link": "/products/medalla-firma?material=oro-rosa"
+          }
+        },
+        "dibujo": {
+          "type": "card",
+          "settings": {
+            "fallback": "mi-prod-dibujo.jpg",
+            "title": "Medalla Firma, oro, con tu dibujo",
+            "price": "$0,000 MXN",
+            "tag": "A la medida",
+            "link": "/products/medalla-firma?material=oro&imagen=1"
+          }
+        }
+      },
+      "block_order": [
+        "oro",
+        "plata",
+        "rosa",
+        "dibujo"
+      ]
+    }
+  },
+  "order": [
+    "mi_configurator",
+    "mi_steps",
+    "mi_other_metals"
+  ]
+}

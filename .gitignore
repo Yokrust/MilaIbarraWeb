@@ -1,10 +1,12 @@
 # Dependencies
 node_modules/
+preview/node_modules/
 
-# Build output
+# Build output — theme/assets/configurator.js is committed on purpose: Shopify
+# deploys whatever's in the repo, it doesn't run our Vite build, so the
+# compiled bundle (even the placeholder stub) has to be real source here.
 dist/
 configurator/dist/
-theme/assets/configurator.*
 
 # Shopify CLI
 .shopify/
@@ -22,3 +24,7 @@ theme/assets/configurator.*
 # Blender backups
 3d-assets/**/*.blend1
 3d-assets/**/*.blend2
+
+# Uncompressed Blender export — rebuilt by 3d-assets/medalla-firma/build_medalla.py;
+# the shipped, meshopt-compressed model is theme/assets/medalla-firma.glb
+3d-assets/**/*.raw.glb
